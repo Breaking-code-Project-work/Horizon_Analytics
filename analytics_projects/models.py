@@ -1,5 +1,6 @@
 from django.db import models
 
+#Classe del progetto
 
 class Funding(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
@@ -49,3 +50,28 @@ class Funding(models.Model):
         self.total_funds_net = self.total_funds_gross - (self.total_savings or 0)
 
         super().save(*args, **kwargs)
+
+class Location(models.Model):
+
+    # 1. Definition of enum of 'macroarea'
+    class MacroAreaChoices(models.TextChoices):
+        OTHER = 'ALTRO', 'ALTRO'
+        NATIONAL SCOPE = 'AMBITO NAZIONALE', 'AMBITO NAZIONALE'
+        MIDDLE-NORTH = 'CENTRO-NORD', 'CENTRO-NORD'
+        ABROAD = 'ESTERO', 'ESTERO'
+        MIDDAY = 'MEZZOGIORNO', 'MEZZOGIORNO'
+        TRASVERSAL = 'TRASVERSALE', 'TRASVERSALE'
+
+    common_code = models.CharField(max_length=9)
+    common_name = models.CharField(max_length=35)
+    province_code = models.CharField(max_length=6)
+    province_name = models.CharField(max_length=21)
+    region_code = models.CharField(max_length=3)
+    region_name = models.CharField(max_length=20)  
+    macroarea = models.CharField(
+        max_length=15,  
+        choices=MacroAreaChoices.choices,
+        default=MacroAreaChoices.OTHER,
+        verbose_name='Macro Area'
+    )
+    project = models.ManyToManyField('Project', related_name='locations')
