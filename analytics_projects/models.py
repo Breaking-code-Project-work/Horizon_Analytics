@@ -1,6 +1,42 @@
 from django.db import models
 
-#Classe del progetto
+class Project(models.Model):
+
+    # Enum project status
+    class ProjectStatusChoices(models.TextChoices):
+        CONCLUDED = 'Concluso', 'Concluso'
+        LIQUIDATED = 'Liquidato', 'Liquidato'
+        ONGOING = 'In corso', 'In corso'
+        NOT_STARTED = 'Non avviato', 'Non avviato'
+        NOT_APPLICABLE = 'Non applicabile', 'Non applicabile'
+
+    # Enum procedural status
+    class ProceduralStatusChoices(models.TextChoices):
+        NOT_STARTED = 'Non avviato', 'Non avviato'
+        STARTING_DESIGN = 'In avvio di progettazione', 'In avvio di progettazione'
+        IN_DESIGN = 'In corso di progettazione', 'In corso di progettazione'
+        IN_TENDER = 'In affidamento', 'In affidamento'
+        IN_EXECUTION = 'In esecuzione', 'In esecuzione'
+        EXECUTED = 'Eseguito', 'Eseguito'
+
+
+    # Attributes
+    cod_locale_progetto = models.CharField(max_length=30, primary_key=True)  # COD_LOCALE_PROGETTO
+    oc_stato_progetto = models.CharField(
+        max_length=30,
+        choices=ProjectStatusChoices.choices,
+        default=ProjectStatusChoices.NOT_APPLICABLE
+    )  # OC_STATO_PROGETTO
+    oc_stato_procedurale = models.CharField(
+        max_length=30,
+        choices=ProceduralStatusChoices.choices,
+        default=ProceduralStatusChoices.NOT_STARTED
+    )  # OC_STATO_PROCEDURALE
+    oc_titolo_progetto = models.CharField(max_length=255)  # OC_TITOLO_PROGETTO
+    cup_descr_settore = models.CharField(max_length=255, blank=True, null=True)  # CUP_DESCR_SETTORE
+    oc_tema_sintetico = models.CharField(max_length=255, blank=True, null=True)  # OC_TEMA_SINTETICO
+    cod_comune = models.CharField(max_length=9, blank=True, null=True)  # COD_COMUNE
+
 
 class Funding(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
