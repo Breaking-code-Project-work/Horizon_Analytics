@@ -98,7 +98,7 @@ class Location(models.Model):
         MIDDAY = 'MEZZOGIORNO', 'MEZZOGIORNO'
         TRASVERSAL = 'TRASVERSALE', 'TRASVERSALE'
 
-    common_code = models.CharField(max_length=9, primary_key = true)
+    common_code = models.CharField(max_length=9, primary_key = True)
     common_name = models.CharField(max_length=35)
     province_code = models.CharField(max_length=6)
     province_name = models.CharField(max_length=21)
