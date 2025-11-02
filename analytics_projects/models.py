@@ -105,7 +105,7 @@ class Location(models.Model):
     region_code = models.CharField(max_length=3)
     region_name = models.CharField(max_length=20)  
     macroarea = models.CharField(
-        max_length=15,  
+        max_length=20,  
         choices=MacroAreaChoices.choices,
         default=MacroAreaChoices.OTHER,
         verbose_name='Macro Area'
