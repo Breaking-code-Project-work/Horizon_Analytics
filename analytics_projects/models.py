@@ -21,21 +21,20 @@ class Project(models.Model):
 
 
     # Attributes
-    cod_locale_progetto = models.CharField(max_length=30, primary_key=True)  # COD_LOCALE_PROGETTO
-    oc_stato_progetto = models.CharField(
+    local_project_code = models.CharField(max_length=30, primary_key=True)  # COD_LOCALE_PROGETTO
+    oc_project_status = models.CharField(
         max_length=30,
         choices=ProjectStatusChoices.choices,
         default=ProjectStatusChoices.NOT_APPLICABLE
     )  # OC_STATO_PROGETTO
-    oc_stato_procedurale = models.CharField(
+    oc_procedural_state = models.CharField(
         max_length=30,
         choices=ProceduralStatusChoices.choices,
         default=ProceduralStatusChoices.NOT_STARTED
     )  # OC_STATO_PROCEDURALE
-    oc_titolo_progetto = models.CharField(max_length=255)  # OC_TITOLO_PROGETTO
-    cup_descr_settore = models.CharField(max_length=255, blank=True, null=True)  # CUP_DESCR_SETTORE
-    oc_tema_sintetico = models.CharField(max_length=255, blank=True, null=True)  # OC_TEMA_SINTETICO
-    cod_comune = models.CharField(max_length=9, blank=True, null=True)  # COD_COMUNE
+    oc_project_title = models.CharField(max_length=255)  # OC_TITOLO_PROGETTO
+    cup_descr_sector = models.CharField(max_length=255, blank=True, null=True)  # CUP_DESCR_SETTORE
+    oc_synthetic_theme = models.CharField(max_length=255, blank=True, null=True)  # OC_TEMA_SINTETICO
 
 
 class Funding(models.Model):
