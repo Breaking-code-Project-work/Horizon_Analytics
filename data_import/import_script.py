@@ -33,6 +33,7 @@ def clean_str(value):
     return value.strip() if isinstance(value, str) else value
 
 
+
 # === Lettura CSV ===
 def import_projects_from_csv(file_path: str):
     """
@@ -53,8 +54,8 @@ def import_projects_from_csv(file_path: str):
 @transaction.atomic
 def load_projects_into_db(projects_data):
     """
-    Carica i dati letti dal CSV nel database Django.
-    Usa transazioni atomiche per garantire la coerenza.
+    Importa i progetti dal CSV associandoli alle sole regioni.
+    Ogni regione è una Location univoca (nessun duplicato).
     """
     for data in projects_data:
         # === PROJECT ===
@@ -69,50 +70,61 @@ def load_projects_into_db(projects_data):
             },
         )
 
-        # === LOCATION ===
-        if data.get("COD_COMUNE"):
-            location, _ = Location.objects.get_or_create(
-                common_code=data["COD_COMUNE"],
-                defaults={
-                    "common_name": data.get("DEN_COMUNE", "Sconosciuto"),
-                    "province_code": data.get("COD_PROVINCIA", ""),
-                    "province_name": data.get("DEN_PROVINCIA", ""),
-                    "region_code": data.get("COD_REGIONE", ""),
-                    "region_name": data.get("DEN_REGIONE", ""),
-                    "macroarea": data.get("OC_MACROAREA", "ALTRO"),
-                },
+        # === REGION LOCATION ===
+        region_code = (data.get("COD_REGIONE") or "").strip()
+        region_name = (data.get("DEN_REGIONE") or "").strip()
+        macroarea = data.get("OC_MACROAREA", "ALTRO").strip().upper() or "ALTRO"
+
+        # Se non c’è codice regione, assegna macroarea fittizia
+        if not region_code:
+            region_mapping = {
+                "AMBITO NAZIONALE": ("000", "Ambito Nazionale"),
+                "TRASVERSALE": ("001", "Ambito Trasversale"),
+                "ESTERO": ("002", "Estero"),
+                "MEZZOGIORNO": ("003", "Mezzogiorno"),
+                "CENTRO-NORD": ("004", "Centro-Nord"),
+                "ALTRO": ("099", "Altro non specificato"),
+            }
+            region_code, region_name = region_mapping.get(
+                macroarea, ("099", "Altro non specificato")
             )
-            # Collega la location al progetto (ManyToMany)
-            project.locations.add(location)
+
+        # Crea o riusa la location
+        location, created = Location.objects.get_or_create(
+            common_code=region_code,
+            defaults={
+                "common_name": region_name,
+                "province_code": "",
+                "province_name": "",
+                "region_code": region_code,
+                "region_name": region_name,
+                "macroarea": macroarea,
+            },
+        )
+
+        # Aggiorna eventuali nomi più recenti
+        if not created:
+            changed = False
+            for field in ["common_name", "region_name", "macroarea"]:
+                new_val = locals()[field] if field in locals() else data.get(field)
+                old_val = getattr(location, field)
+                if new_val and old_val != new_val:
+                    setattr(location, field, new_val)
+                    changed = True
+            if changed:
+                location.save()
+
+        # Collega il progetto alla regione
+        project.locations.add(location)
 
         # === FUNDING ===
         Funding.objects.update_or_create(
             project=project,
             defaults={
                 "eu_funds": safe_float(data.get("FINANZ_UE")),
-                "eu_funds_fesr": safe_float(data.get("FINANZ_UE_FESR")),
-                "eu_funds_fse": safe_float(data.get("FINANZ_UE_FSE")),
-                "eu_funds_feasr": safe_float(data.get("FINANZ_UE_FEASR")),
-                "eu_funds_feamp": safe_float(data.get("FINANZ_UE_FEAMP")),
-                "eu_funds_iog": safe_float(data.get("FINANZ_UE_IOG")),
-                "state_rotating_fund": safe_float(data.get("FINANZ_STATO_FONDO_DI_ROTAZIONE")),
-                "state_fsc": safe_float(data.get("FINANZ_STATO_FSC")),
-                "state_pac": safe_float(data.get("FINANZ_STATO_PAC")),
-                "state_completions": safe_float(data.get("FINANZ_STATO_COMPLETAMENTI")),
-                "state_other_measures": safe_float(data.get("FINANZ_STATO_ALTRI_PROVVEDIMENTI")),
-                "regional_funds": safe_float(data.get("FINANZ_REGIONE")),
-                "provincial_funds": safe_float(data.get("FINANZ_PROVINCIA")),
-                "municipal_funds": safe_float(data.get("FINANZ_COMUNE")),
-                "freed_resources": safe_float(data.get("FINANZ_RISORSE_LIBERATE")),
-                "other_public_funds": safe_float(data.get("FINANZ_ALTRO_PUBBLICO")),
-                "foreign_state": safe_float(data.get("FINANZ_STATO_ESTERO")),
-                "private_funds": safe_float(data.get("FINANZ_PRIVATO")),
-                "funds_to_find": safe_float(data.get("FINANZ_DA_REPERIRE")),
-                "total_savings": safe_float(data.get("ECONOMIE_TOTALI")),
-                "total_public_savings": safe_float(data.get("ECONOMIE_TOTALI_PUBBLICHE")),
                 "total_funds_gross": safe_float(data.get("FINANZ_TOTALE_PUBBLICO")),
                 "total_funds_net": safe_float(data.get("OC_FINANZ_TOT_PUB_NETTO")),
             },
         )
 
-    logger.info("Tutti i progetti sono stati caricati nel database con successo")
+    logger.info("✅ Import completato: location basate solo su regioni create con successo.")

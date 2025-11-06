@@ -1,0 +1,16 @@
+<!-- analytics_projects/templates/analytics_projects/import_csv.html -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Importa CSV</title>
+</head>
+<body>
+    <h1>Carica file CSV</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file" accept=".csv" required>
+        <button type="submit">Importa</button>
+    </form>
+</body>
+</html>
