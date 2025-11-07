@@ -97,12 +97,7 @@ class Location(models.Model):
         ABROAD = 'ESTERO', 'ESTERO'
         MIDDAY = 'MEZZOGIORNO', 'MEZZOGIORNO'
         TRASVERSAL = 'TRASVERSALE', 'TRASVERSALE'
-
-    common_code = models.CharField(max_length=9, primary_key = True)
-    common_name = models.CharField(max_length=35)
-    province_code = models.CharField(max_length=6)
-    province_name = models.CharField(max_length=21)
-    region_code = models.CharField(max_length=3)
+    region_code = models.CharField(max_length=3, primary_key = True)
     region_name = models.CharField(max_length=20)  
     macroarea = models.CharField(
         max_length=20,  
