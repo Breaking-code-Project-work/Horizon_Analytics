@@ -1,25 +1,26 @@
 import csv
 import logging
+import glob
 import os
 from django.db import transaction
 from analytics_projects.models import Project, Funding, Location
 
-# Imposta il modulo settings del progetto
+# Setup Django 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Horizon_Analytics.settings")
+import django
+django.setup()
 
-# === Configurazione logging ===
+# Logging 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# === Percorso del CSV ===
+# Path CSV 
 file_path = "../progetti_esteso_2021-2027_20250630.csv"
 
 
+# float normalize
 def safe_float(value):
-    """
-    Converte in float gestendo valori nulli, 'N/A' o vuoti.
-    Sostituisce eventuali virgole con punti.
-    """
+    """Converte valori in float gestendo vuoti, N/A, NULL."""
     try:
         if value in (None, "", "N/A", "NULL"):
             return 0.0
@@ -29,35 +30,58 @@ def safe_float(value):
 
 
 def clean_str(value):
-    """Pulisce stringhe da spazi o valori nulli."""
+    """Rimuove spazi iniziali/finali da stringhe."""
     return value.strip() if isinstance(value, str) else value
 
 
-# === Lettura CSV ===
-def import_projects_from_csv(file_path: str):
+# CSV reading
+def import_multiple_csv(folder_path: str):
     """
-    Legge un file CSV e restituisce una lista di dizionari con i dati.
+    Importa tutti i CSV in una cartella con la stessa intestazione.
+    Restituisce una lista unica di dizionari, saltando le intestazioni duplicate.
     """
-    projects_data = []
+    all_data = []
+    csv_files = sorted(glob.glob(f"{folder_path}/*.csv"))  # All csv
 
-    with open(file_path, mode="r", encoding="utf-8") as file:
-        reader = csv.DictReader(file, delimiter=";")
-        for row in reader:
-            projects_data.append({k: clean_str(v) for k, v in row.items()})
+    for i, file_path in enumerate(csv_files):
+        with open(file_path, mode="r", encoding="utf-8") as f:
+            reader = csv.DictReader(f, delimiter=";")
+            rows = list(reader)
+            logger.info(f"Importati {len(rows)} record da {file_path}")
+            all_data.extend(rows)  # concatenate all lines
+    logger.info(f"Totale record importati da tutti i CSV: {len(all_data)}")
+    return all_data
 
-    logger.info(f"Importati {len(projects_data)} record dal file {file_path}")
-    return projects_data
+
+# Normalize csv
+def normalize_projects_data(projects_data):
+    normalized_data = []
+    DELIMITER = ":::"
+    for data in projects_data:
+        region_codes = str(data.get("COD_REGIONE", "") or "").split(DELIMITER)
+        region_names = str(data.get("DEN_REGIONE", "") or "").split(DELIMITER)
+
+        # no multiple regions
+        if len(region_codes) == 1 and len(region_names) == 1:
+            normalized_data.append(data)
+            continue
+
+        # duplicate rows
+        for code, name in zip(region_codes, region_names):
+            new_row = data.copy()
+            new_row["COD_REGIONE"] = code.strip()
+            new_row["DEN_REGIONE"] = name.strip()
+            normalized_data.append(new_row)
+
+    logger.info(f"Normalizzazione completata: {len(projects_data)} → {len(normalized_data)} righe")
+    return normalized_data
 
 
-# === Importazione nel database ===
+# Import on database 
 @transaction.atomic
 def load_projects_into_db(projects_data):
-    """
-    Carica i dati letti dal CSV nel database Django.
-    Usa transazioni atomiche per garantire la coerenza.
-    """
     for data in projects_data:
-        # === PROJECT ===
+        # PROJECT 
         project, _ = Project.objects.update_or_create(
             local_project_code=data["COD_LOCALE_PROGETTO"],
             defaults={
@@ -69,23 +93,36 @@ def load_projects_into_db(projects_data):
             },
         )
 
-        # === LOCATION ===
-        if data.get("COD_COMUNE"):
-            location, _ = Location.objects.get_or_create(
-                common_code=data["COD_COMUNE"],
+        # LOCATION
+        if data.get("COD_REGIONE"):
+            region_code = data.get("COD_REGIONE", "").strip()
+            region_name = data.get("DEN_REGIONE", "").strip()
+            macroarea = data.get("OC_MACROAREA", "ALTRO").strip()
+
+            location, created = Location.objects.get_or_create(
+                region_code=region_code,
                 defaults={
-                    "common_name": data.get("DEN_COMUNE", "Sconosciuto"),
-                    "province_code": data.get("COD_PROVINCIA", ""),
-                    "province_name": data.get("DEN_PROVINCIA", ""),
-                    "region_code": data.get("COD_REGIONE", ""),
-                    "region_name": data.get("DEN_REGIONE", ""),
-                    "macroarea": data.get("OC_MACROAREA", "ALTRO"),
+                    "region_name": region_name,
+                    "macroarea": macroarea,
                 },
             )
-            # Collega la location al progetto (ManyToMany)
+
+            # load fields changed
+            if not created:
+                changed = False
+                if region_name and location.region_name != region_name:
+                    location.region_name = region_name
+                    changed = True
+                if macroarea and location.macroarea != macroarea:
+                    location.macroarea = macroarea
+                    changed = True
+                if changed:
+                    location.save()
+
+            # link project to region
             project.locations.add(location)
 
-        # === FUNDING ===
+        # FUNDING
         Funding.objects.update_or_create(
             project=project,
             defaults={
@@ -115,4 +152,10 @@ def load_projects_into_db(projects_data):
             },
         )
 
-    logger.info("Tutti i progetti sono stati caricati nel database con successo")
+    logger.info("Import completato con successo (regioni e macroaree create).")
+
+
+if __name__ == "__main__":
+    projects = import_multiple_csv("\csv") #path folder
+    normalized_projects = normalize_projects_data(projects)
+    load_projects_into_db(normalized_projects)
