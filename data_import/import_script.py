@@ -33,8 +33,18 @@ def clean_str(value):
     """Rimuove spazi iniziali/finali da stringhe."""
     return value.strip() if isinstance(value, str) else value
 
-
 # CSV reading
+def import_projects_from_csv(file_path: str):
+    """Legge un file CSV e restituisce una lista di dizionari con i dati."""
+    projects_data = []
+    with open(file_path, mode="r", encoding="utf-8") as file:
+        reader = csv.DictReader(file, delimiter=";")
+        for row in reader:
+            projects_data.append({k: clean_str(v) for k, v in row.items()})
+    logger.info(f"Importati {len(projects_data)} record dal file {file_path}")
+    return projects_data
+
+# multiple CSV reading
 def import_multiple_csv(folder_path: str):
     """
     Importa tutti i CSV in una cartella con la stessa intestazione.
@@ -156,6 +166,7 @@ def load_projects_into_db(projects_data):
 
 
 if __name__ == "__main__":
-    projects = import_multiple_csv("\csv") #path folder
+    #projects = import_projects_from_csv(/csv/Progetti_2021-2027_1.csv) #path file
+    projects = import_multiple_csv("/csv") #path folder
     normalized_projects = normalize_projects_data(projects)
     load_projects_into_db(normalized_projects)
