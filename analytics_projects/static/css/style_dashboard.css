@@ -1,0 +1,277 @@
+/*
+ * File: style_dashboard.css
+ * Description: Styles for the Horizon Analytics dashboard page.
+ * Standards compliant with standard_di_programmazione_FE.pdf
+ * Last Modified: Applied user-requested visual updates.
+*/
+
+/* ------------------- */
+/* CSS Variables       */
+/* ------------------- */
+:root {
+    --font-primary: 'Arimo', sans-serif;
+    --color-black: #000000;
+    --color-blue: #2b29a7;
+    --color-white: #FFFFFF;
+    --gradient-black-blue: linear-gradient(to right, #000000, #2b29a7);
+    --border-radius: 20px;
+    --transition-speed: 0.3s;
+    --container-padding: 5%;
+    /* New variables for shadow effect */
+    --shadow-light: rgba(255, 255, 255, 0.7);
+    --shadow-dark: rgba(0, 0, 0, 0.25);
+}
+
+/* ------------------- */
+/* Base & Reset Styles */
+/* ------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-primary);
+    /* MODIFICATION: Background set to white */
+    background-color: var(--color-white);
+    /* MODIFICATION: Default text color set to black */
+    color: var(--color-black);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 700;
+}
+
+/* ------------------- */
+/* Header Styles       */
+/* ------------------- */
+.main_header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 32px var(--container-padding);
+    /* MODIFICATION: Title color is now inherited (black) */
+}
+
+/* MODIFICATION: Logo color set to black */
+.logo path {
+    stroke: var(--color-black);
+}
+
+.intro{
+    padding-left: 6%;
+    padding-right: 6%;
+    margin-bottom: 1%;
+    text-align: justify;
+    font-size: clamp(1.25rem, 1vw, 1.5rem);
+}
+
+/* ------------------- */
+/* Dashboard Grid      */
+/* ------------------- */
+.dashboard_grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    grid-auto-rows: minmax(180px, auto);
+    gap: 24px;
+    padding: 16px var(--container-padding);
+}
+
+.dashboard_card {
+    border-radius: var(--border-radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow:
+        -6px -6px 12px var(--shadow-light),
+        6px 6px 12px var(--shadow-dark);
+}
+
+.dashboard_card:hover {
+    transform: translateY(-8px);
+    box-shadow:
+        -8px -8px 16px var(--shadow-light),
+        8px 8px 16px var(--shadow-dark);
+}
+
+.dashboard_card h2 {
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    line-height: 1.2;
+}
+
+.dashboard_card h3 {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+}
+
+.sub_title_card {
+    color: transparent;
+    margin-top: 10px;
+}
+.dashboard_card:hover .sub_title_card {
+    color: white;
+    transition: var(--transition-speed) ease-in-out;
+}
+
+/* MODIFICA QUI: Ripristinate le dimensioni per il box "Visione d'insieme" */
+.overview_card {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3; /* <-- CORREZIONE: Regola ripristinata */
+    background-image: var(--gradient-black-blue);
+    color: var(--color-white);
+}
+
+.financial_analysis_card,
+.efficiency_performance_card,
+.sectoral_analysis_card {
+    background-color: var(--color-blue);
+    color: var(--color-white);
+}
+
+.territories_actors_card,
+.beneficiaries_card,
+.anomalies_card {
+    background-color: var(--color-black);
+    color: var(--color-white);
+}
+
+
+/* ------------------- */
+/* Icon Styles         */
+/* ------------------- */
+
+/* MODIFICA QUI: Stile unificato per tutte le frecce */
+.card_icon {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    font-weight: bold;
+    line-height: 1;
+    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+/* Aggiunge il contenuto "freccia" all'elemento */
+.card_icon::after {
+    content: '→';
+    transition: color var(--transition-speed) ease;
+}
+
+/* Inverte i colori al passaggio del mouse */
+.dashboard_card:hover .card_icon {
+    background-color: currentColor;
+}
+
+.dashboard_card:hover .card_icon::after {
+    color: var(--color-black); /* Freccia bianca su sfondi blu/gradiente */
+}
+
+/* Caso specifico per card con sfondo bianco, la freccia diventa nera */
+.territories_actors_card:hover .card_icon::after,
+.beneficiaries_card:hover .card_icon::after,
+.anomalies_card:hover .card_icon::after {
+    color: var(--color-black);
+}
+
+/* ------------------- */
+/* Footer Styles       */
+/* ------------------- */
+.main_footer {
+    background-color: var(--color-blue);
+    color: var(--color-white); /* Set footer text to white */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    padding: 48px var(--container-padding);
+    margin-top: 48px;
+}
+
+/* MODIFICATION: Aligning text for each column */
+.footer_column:nth-child(1) {
+    text-align: left;
+}
+.footer_column:nth-child(2) {
+    text-align: center;
+}
+.footer_column:nth-child(3) {
+    text-align: right;
+}
+
+.footer_column h4 {
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+}
+
+.footer_column ul li {
+    margin-bottom: 8px;
+}
+
+.footer_column a {
+    opacity: 0.8;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.footer_column a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* ------------------- */
+/* Responsive Design   */
+/* ------------------- */
+
+@media (max-width: 1024px) {
+    .dashboard_grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: minmax(200px, auto);
+    }
+    .overview_card {
+        grid-column: 1 / 3;
+        grid-row: 1 / 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard_grid {
+        grid-template-columns: 1fr;
+    }
+    .overview_card {
+        grid-column: auto;
+        grid-row: auto;
+    }
+    .main_footer {
+        grid-template-columns: 1fr;
+        /* MODIFICATION: Center align all footer text on mobile */
+        text-align: center;
+    }
+}
