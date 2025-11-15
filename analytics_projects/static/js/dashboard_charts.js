@@ -18,7 +18,7 @@ async function fetchDashboardData() {
     };
 
     const queryString = new URLSearchParams(params).toString();
-    const url = `api/overview/?${queryString}`; // Nota il '?' prima dei parametri
+    const url = `/api/overview/?${queryString}`;
 
     try {
         const response = await fetch(url, {
