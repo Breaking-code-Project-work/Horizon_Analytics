@@ -95,7 +95,7 @@
         <!-- Inclusione Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
         <!-- Inclusione Script Personalizzato -->
-        <script src="dashboard_charts.js"></script>
+        <script src="{% url 'dashboard_charts' %}"></script>
 
     </main>
     
@@ -126,7 +126,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="dashboard_charts.js"></script>
+    <script src="{% url 'dashboard_charts' %}"></script>
 
 </body>
 </html>
