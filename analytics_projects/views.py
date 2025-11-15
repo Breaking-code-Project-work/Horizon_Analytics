@@ -1,7 +1,18 @@
+from django.shortcuts import render
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 #here go the import for backend script
+
+def dashboard(request):
+    return render(request, 'analytics_projects/dashboard.html')
+
+
+def import_csv(request):
+    if request.method == 'POST':
+        return HttpResponse("CSV importato con successo!")
+    return render(request, 'analytics_projects/import_csv.html')
 
 class OverviewAPI(APIView):
     """
