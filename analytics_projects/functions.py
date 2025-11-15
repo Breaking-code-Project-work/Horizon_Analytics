@@ -12,18 +12,6 @@ from analytics_projects.models import Project, Location, Funding
 #to use sum on queries
 from django.db.models import Sum
 #Function that give number of projects 
-def countProjects(filters):
-    projects = Project.objects.all()
-
-    region = filters.get("region")
-    if region and region != "nessun filtro":
-        projects = projects.filter(location__region=region).distinct()
-
-    macroarea = filters.get("macroarea")
-    if macroarea and macroarea != "nessun filtro":
-        projects = projects.filter(location__macroarea=macroarea).distinct()
-
-    return projects.count()
 
 #Function that give financing of projects 
 
