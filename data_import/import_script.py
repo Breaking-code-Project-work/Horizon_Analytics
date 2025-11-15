@@ -1,14 +1,14 @@
-import csv
-import logging
-import glob
 import os
-from django.db import transaction
-from analytics_projects.models import Project, Funding, Location
 
 # Setup Django 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Horizon_Analytics.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "horizon_analytics.settings")
 import django
 django.setup()
+
+import glob, logging, csv 
+
+from django.db import transaction
+from analytics_projects.models import Project, Funding, Location
 
 # Logging 
 logging.basicConfig(level=logging.INFO)
@@ -167,6 +167,6 @@ def load_projects_into_db(projects_data):
 
 if __name__ == "__main__":
     #projects = import_projects_from_csv(/csv/Progetti_2021-2027_1.csv) #path file
-    projects = import_multiple_csv("/csv") #path folder
+    projects = import_multiple_csv("csv") #path folder
     normalized_projects = normalize_projects_data(projects)
     load_projects_into_db(normalized_projects)
