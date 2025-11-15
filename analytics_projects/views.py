@@ -7,13 +7,14 @@ class OverviewAPI(APIView):
     """
     API that recieve filters from frontend and give as output a Jason called data
     """
-    def post(self, request):
-        # Recover filters from Frontend
-        filters = request.data.get("filters", {})
-
-        # Pick filters from frontend
-        region = filters.get("region")
-        macroarea = filters.get("macroarea")
+    def get(self, request):
+        # Recover filters from query string
+        region = request.query_params.get("region")
+        macroarea = request.query_params.get("macroarea")
+        filters = {
+            "region": region,
+            "macroarea": macroarea
+        }
 
         # variabiles of back end
         numProjects = 1          
