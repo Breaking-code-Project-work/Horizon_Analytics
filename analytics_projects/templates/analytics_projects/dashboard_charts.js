@@ -1,50 +1,114 @@
 /**
  * File: dashboard_charts.js
  * Description: Chart.js visualizations for Visione d'Insieme dashboard
- * Last Modified: 2025-11-09
+ * Last Modified: 2025-11-15
  */
 
 // ==========================================
-// PLACEHOLDER DATA
+// API INTEGRATION
 // ==========================================
 
-const placeholderData = {
-    kpi: {
-        totale_progetti: 1500,
-        valore_complessivo: 2500000000
-    },
-    statoAvanzamento: {
-        labels: ["Conclusi", "In Corso", "Non Avviati"],
-        data: [700, 500, 300]
-    },
-    ripartizione: {
-        labels: ["Mezzogiorno", "Centro-Nord"],
-        data: [1000000000, 1500000000]
-    },
-    progettiCostosi: {
-        labels: [
-            "Progetto A - Roma",
-            "Progetto B - Milano",
-            "Progetto C - Napoli",
-            "Progetto D - Torino",
-            "Progetto E - Firenze",
-            "Progetto F - Bologna",
-            "Progetto G - Bari",
-            "Progetto H - Palermo",
-            "Progetto I - Genova",
-            "Progetto J - Venezia"
-        ],
-        data: [150000000, 135000000, 120000000, 110000000, 105000000, 95000000, 90000000, 85000000, 82000000, 80000000]
-    },
-    settori: {
-        labels: ["Energia", "Trasporti", "Sanità", "Istruzione", "Digitale"],
-        data: [500000000, 450000000, 300000000, 200000000, 150000000]
-    },
-    grandiProgetti: {
-        labels: ["Lombardia"],
-        data: [1]
+/**
+ * Recupera i dati dall'API
+ */
+async function fetchDashboardData() {
+    const params = {
+        region: 'nessun filtro',
+        macroarea: 'nessun filtro'
+    };
+
+    const queryString = new URLSearchParams(params).toString();
+    const url = `api/overview/?${queryString}`; // Nota il '?' prima dei parametri
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET'
+        });
+
+        if (!response.ok) {
+            throw new Error('Errore nella risposta del server');
+        }
+
+        const jsonData = await response.json();
+        console.log('Risposta dal server:', jsonData);
+
+        return jsonData.data; // Ritorna solo la sezione 'data' della risposta
+    } catch (error) {
+        console.error('Errore nella richiesta:', error);
+        return null;
     }
-};
+}
+
+/**
+ * Trasforma i dati dell'API nel formato richiesto dai grafici
+ */
+function transformAPIData(apiData) {
+    if (!apiData) return null;
+
+    return {
+        kpi: {
+            totale_progetti: apiData.numProjects,
+            valore_complessivo: apiData.totalFinancing
+        },
+        statoAvanzamento: {
+            labels: ["Conclusi", "In Corso", "Non Avviati"],
+            data: [
+                apiData.numberEndedProjects,
+                apiData.numberProjectsInProgress,
+                apiData.numberNotStartedProjects
+            ]
+        },
+        ripartizione: {
+            labels: ["Mezzogiorno", "Centro-Nord"],
+            data: [
+                apiData.MiddayFinancing,
+                apiData.MiddleNorthFinancing
+            ]
+        },
+        progettiCostosi: {
+            labels: [
+                apiData.TopProjects.Project1[0] || "Progetto 1",
+                apiData.TopProjects.Project2[0] || "Progetto 2",
+                apiData.TopProjects.Project3[0] || "Progetto 3",
+                apiData.TopProjects.Project4[0] || "Progetto 4",
+                apiData.TopProjects.Project5[0] || "Progetto 5",
+                apiData.TopProjects.Project6[0] || "Progetto 6",
+                apiData.TopProjects.Project7[0] || "Progetto 7",
+                apiData.TopProjects.Project8[0] || "Progetto 8",
+                apiData.TopProjects.Project9[0] || "Progetto 9",
+                apiData.TopProjects.Project10[0] || "Progetto 10"
+            ],
+            data: [
+                apiData.TopProjects.Project1[1] || 0,
+                apiData.TopProjects.Project2[1] || 0,
+                apiData.TopProjects.Project3[1] || 0,
+                apiData.TopProjects.Project4[1] || 0,
+                apiData.TopProjects.Project5[1] || 0,
+                apiData.TopProjects.Project6[1] || 0,
+                apiData.TopProjects.Project7[1] || 0,
+                apiData.TopProjects.Project8[1] || 0,
+                apiData.TopProjects.Project9[1] || 0,
+                apiData.TopProjects.Project10[1] || 0
+            ]
+        },
+        settori: {
+            labels: [
+                apiData.TopSectors.Sector1[0] || "Settore 1",
+                apiData.TopSectors.Sector2[0] || "Settore 2",
+                apiData.TopSectors.Sector3[0] || "Settore 3"
+            ],
+            data: [
+                apiData.TopSectors.Sector1[1] || 0,
+                apiData.TopSectors.Sector2[1] || 0,
+                apiData.TopSectors.Sector3[1] || 0
+            ]
+        },
+        grandiProgetti: {
+            labels: ["Totale"],
+            data: [apiData.numberBigProjects]
+        }
+    };
+}
 
 // ==========================================
 // UTILITY FUNCTIONS
@@ -90,16 +154,16 @@ function updateKPICards(data) {
 function createPieChartStato(data) {
     const ctx = document.getElementById('pieChartStato').getContext('2d');
 
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'pie',
         data: {
             labels: data.statoAvanzamento.labels,
             datasets: [{
                 data: data.statoAvanzamento.data,
                 backgroundColor: [
-                    '#2b29a7',  // Blu principale
-                    '#504f9c',  // Viola hover
-                    '#7f7ec7'   // Azzurro chiaro
+                    '#2b29a7',
+                    '#504f9c',
+                    '#7f7ec7'
                 ],
                 borderWidth: 2,
                 borderColor: '#ffffff'
@@ -141,7 +205,7 @@ function createPieChartStato(data) {
 function createBarChartRipartizione(data) {
     const ctx = document.getElementById('barChartRipartizione').getContext('2d');
 
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.ripartizione.labels,
@@ -205,7 +269,7 @@ function createBarChartRipartizione(data) {
 function createHorizontalBarProgettiCostosi(data) {
     const ctx = document.getElementById('horizontalBarProgettiCostosi').getContext('2d');
 
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.progettiCostosi.labels,
@@ -270,7 +334,7 @@ function createHorizontalBarProgettiCostosi(data) {
 function createHorizontalBarSettori(data) {
     const ctx = document.getElementById('horizontalBarSettori').getContext('2d');
 
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.settori.labels,
@@ -336,37 +400,33 @@ function createHorizontalBarSettori(data) {
 /**
  * Inizializza tutti i grafici quando il DOM è pronto
  */
-document.addEventListener('DOMContentLoaded', function() {
-    // Aggiorna le KPI cards
-    updateKPICards(placeholderData);
-
-    // Crea tutti i grafici
-    createPieChartStato(placeholderData);
-    createBarChartRipartizione(placeholderData);
-    createHorizontalBarProgettiCostosi(placeholderData);
-    createHorizontalBarSettori(placeholderData);
-});
-
-// ==========================================
-// API INTEGRATION (Per il futuro)
-// ==========================================
-
-/**
- * Funzione per caricare dati dal backend
- * Sostituisci placeholderData con questa funzione quando il backend è pronto
- */
-async function loadDataFromAPI() {
+document.addEventListener('DOMContentLoaded', async function() {
     try {
-        const response = await fetch('/api/visione-insieme');
-        const data = await response.json();
+        // Mostra un indicatore di caricamento (opzionale)
+        console.log('Caricamento dati dalla API...');
 
-        // Aggiorna KPI e grafici con dati reali
-        updateKPICards(data);
-        // Ricrea i grafici con i nuovi dati...
+        // Recupera i dati dall'API
+        const apiData = await fetchDashboardData();
 
+        if (!apiData) {
+            console.error('Impossibile recuperare i dati dall\'API');
+            return;
+        }
+
+        // Trasforma i dati nel formato corretto
+        const chartData = transformAPIData(apiData);
+
+        // Aggiorna le KPI cards
+        updateKPICards(chartData);
+
+        // Crea tutti i grafici
+        createPieChartStato(chartData);
+        createBarChartRipartizione(chartData);
+        createHorizontalBarProgettiCostosi(chartData);
+        createHorizontalBarSettori(chartData);
+
+        console.log('Dashboard caricata con successo');
     } catch (error) {
-        console.error('Errore nel caricamento dei dati:', error);
-        // Usa i dati placeholder in caso di errore
-        updateKPICards(placeholderData);
+        console.error('Errore durante l\'inizializzazione della dashboard:', error);
     }
-}
+});
