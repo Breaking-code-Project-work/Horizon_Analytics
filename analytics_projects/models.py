@@ -21,18 +21,18 @@ class Project(models.Model):
 
 
     # Attributes
-    local_project_code = models.CharField(max_length=30, primary_key=True)  # COD_LOCALE_PROGETTO
+    local_project_code = models.CharField(max_length=100, primary_key=True)  # COD_LOCALE_PROGETTO
     oc_project_status = models.CharField(
-        max_length=30,
+        max_length=100,
         choices=ProjectStatusChoices.choices,
         default=ProjectStatusChoices.NOT_APPLICABLE
     )  # OC_STATO_PROGETTO
     oc_procedural_state = models.CharField(
-        max_length=30,
+        max_length=100,
         choices=ProceduralStatusChoices.choices,
         default=ProceduralStatusChoices.NOT_STARTED
     )  # OC_STATO_PROCEDURALE
-    oc_project_title = models.CharField(max_length=255)  # OC_TITOLO_PROGETTO
+    oc_project_title = models.TextField()  # OC_TITOLO_PROGETTO
     cup_descr_sector = models.CharField(max_length=255, blank=True, null=True)  # CUP_DESCR_SETTORE
     oc_synthetic_theme = models.CharField(max_length=255, blank=True, null=True)  # OC_TEMA_SINTETICO
 
@@ -96,10 +96,10 @@ class Location(models.Model):
         ABROAD = 'ESTERO', 'ESTERO'
         MIDDAY = 'MEZZOGIORNO', 'MEZZOGIORNO'
         TRASVERSAL = 'TRASVERSALE', 'TRASVERSALE'
-    region_code = models.CharField(max_length=3, primary_key = True)
-    region_name = models.CharField(max_length=20)  
+    region_code = models.CharField(max_length=20, primary_key = True)
+    region_name = models.CharField(max_length=50)
     macroarea = models.CharField(
-        max_length=20,  
+        max_length=50,
         choices=MacroAreaChoices.choices,
         default=MacroAreaChoices.OTHER,
         verbose_name='Macro Area'

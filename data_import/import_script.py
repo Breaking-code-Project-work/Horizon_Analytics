@@ -37,10 +37,12 @@ def clean_str(value):
 def import_projects_from_csv(file_path: str):
     """Legge un file CSV e restituisce una lista di dizionari con i dati."""
     projects_data = []
-    with open(file_path, mode="r", encoding="utf-8") as file:
+    with open(file_path, mode="r", encoding="utf-8-sig") as file:  # <- usa utf-8-sig per BOM
         reader = csv.DictReader(file, delimiter=";")
         for row in reader:
-            projects_data.append({k: clean_str(v) for k, v in row.items()})
+            # rimuove virgolette dai nomi delle colonne e dai valori
+            clean_row = {k.strip().strip('"'): clean_str(v).strip('"') for k, v in row.items()}
+            projects_data.append(clean_row)
     logger.info(f"Importati {len(projects_data)} record dal file {file_path}")
     return projects_data
 
@@ -166,7 +168,8 @@ def load_projects_into_db(projects_data):
 
 
 if __name__ == "__main__":
-    #projects = import_projects_from_csv(/csv/Progetti_2021-2027_1.csv) #path file
-    projects = import_multiple_csv("csv") #path folder
+    projects = import_projects_from_csv("csv/Progetti_2021-2027_1.csv")  # percorso relativo del CSV
+    #projects = import_multiple_csv("csv") #path folder
+    print(projects[0].keys())
     normalized_projects = normalize_projects_data(projects)
     load_projects_into_db(normalized_projects)
