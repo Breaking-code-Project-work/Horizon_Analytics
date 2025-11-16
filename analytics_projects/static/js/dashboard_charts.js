@@ -1,20 +1,31 @@
 /**
  * File: dashboard_charts.js
  * Description: Chart.js visualizations for Visione d'Insieme dashboard
- * Last Modified: 2025-11-15
+ * Last Modified: 2025-11-16
  */
+
+// ==========================================
+// GLOBAL VARIABLES
+// ==========================================
+
+let chartInstances = {
+    pieChartStato: null,
+    barChartRipartizione: null,
+    horizontalBarProgettiCostosi: null,
+    horizontalBarSettori: null
+};
 
 // ==========================================
 // API INTEGRATION
 // ==========================================
 
 /**
- * Recupera i dati dall'API
+ * Recupera i dati dall'API con i filtri specificati
  */
-async function fetchDashboardData() {
+async function fetchDashboardData(region = 'nessun filtro', macroarea = 'nessun filtro') {
     const params = {
-        region: 'nessun filtro',
-        macroarea: 'nessun filtro'
+        region: region,
+        macroarea: macroarea
     };
 
     const queryString = new URLSearchParams(params).toString();
@@ -32,7 +43,7 @@ async function fetchDashboardData() {
         const jsonData = await response.json();
         console.log('Risposta dal server:', jsonData);
 
-        return jsonData.data; // Ritorna solo la sezione 'data' della risposta
+        return jsonData.data;
     } catch (error) {
         console.error('Errore nella richiesta:', error);
         return null;
@@ -154,7 +165,12 @@ function updateKPICards(data) {
 function createPieChartStato(data) {
     const ctx = document.getElementById('pieChartStato').getContext('2d');
 
-    return new Chart(ctx, {
+    // Distruggi il grafico esistente se presente
+    if (chartInstances.pieChartStato) {
+        chartInstances.pieChartStato.destroy();
+    }
+
+    chartInstances.pieChartStato = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: data.statoAvanzamento.labels,
@@ -197,6 +213,8 @@ function createPieChartStato(data) {
             }
         }
     });
+
+    return chartInstances.pieChartStato;
 }
 
 /**
@@ -205,7 +223,11 @@ function createPieChartStato(data) {
 function createBarChartRipartizione(data) {
     const ctx = document.getElementById('barChartRipartizione').getContext('2d');
 
-    return new Chart(ctx, {
+    if (chartInstances.barChartRipartizione) {
+        chartInstances.barChartRipartizione.destroy();
+    }
+
+    chartInstances.barChartRipartizione = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.ripartizione.labels,
@@ -261,6 +283,8 @@ function createBarChartRipartizione(data) {
             }
         }
     });
+
+    return chartInstances.barChartRipartizione;
 }
 
 /**
@@ -269,7 +293,11 @@ function createBarChartRipartizione(data) {
 function createHorizontalBarProgettiCostosi(data) {
     const ctx = document.getElementById('horizontalBarProgettiCostosi').getContext('2d');
 
-    return new Chart(ctx, {
+    if (chartInstances.horizontalBarProgettiCostosi) {
+        chartInstances.horizontalBarProgettiCostosi.destroy();
+    }
+
+    chartInstances.horizontalBarProgettiCostosi = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.progettiCostosi.labels,
@@ -326,6 +354,8 @@ function createHorizontalBarProgettiCostosi(data) {
             }
         }
     });
+
+    return chartInstances.horizontalBarProgettiCostosi;
 }
 
 /**
@@ -334,7 +364,11 @@ function createHorizontalBarProgettiCostosi(data) {
 function createHorizontalBarSettori(data) {
     const ctx = document.getElementById('horizontalBarSettori').getContext('2d');
 
-    return new Chart(ctx, {
+    if (chartInstances.horizontalBarSettori) {
+        chartInstances.horizontalBarSettori.destroy();
+    }
+
+    chartInstances.horizontalBarSettori = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: data.settori.labels,
@@ -391,6 +425,40 @@ function createHorizontalBarSettori(data) {
             }
         }
     });
+
+    return chartInstances.horizontalBarSettori;
+}
+
+// ==========================================
+// DASHBOARD UPDATE FUNCTION
+// ==========================================
+
+/**
+ * Aggiorna tutti i grafici con nuovi dati
+ */
+async function updateDashboard(region, macroarea) {
+    try {
+        console.log(`Caricamento dati per Regione: ${region}, Macroarea: ${macroarea}`);
+
+        const apiData = await fetchDashboardData(region, macroarea);
+
+        if (!apiData) {
+            console.error('Impossibile recuperare i dati dall\'API');
+            return;
+        }
+
+        const chartData = transformAPIData(apiData);
+
+        updateKPICards(chartData);
+        createPieChartStato(chartData);
+        createBarChartRipartizione(chartData);
+        createHorizontalBarProgettiCostosi(chartData);
+        createHorizontalBarSettori(chartData);
+
+        console.log('Dashboard aggiornata con successo');
+    } catch (error) {
+        console.error('Errore durante l\'aggiornamento della dashboard:', error);
+    }
 }
 
 // ==========================================
@@ -398,35 +466,33 @@ function createHorizontalBarSettori(data) {
 // ==========================================
 
 /**
- * Inizializza tutti i grafici quando il DOM è pronto
+ * Inizializza la dashboard e gestisce gli eventi dei filtri
  */
 document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        // Mostra un indicatore di caricamento (opzionale)
-        console.log('Caricamento dati dalla API...');
+    // Carica i dati iniziali
+    await updateDashboard('nessun filtro', 'nessun filtro');
 
-        // Recupera i dati dall'API
-        const apiData = await fetchDashboardData();
+    // Gestisci il click sul pulsante "Applica Filtri"
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    const regionFilter = document.getElementById('regionFilter');
+    const macroareaFilter = document.getElementById('macroareaFilter');
 
-        if (!apiData) {
-            console.error('Impossibile recuperare i dati dall\'API');
-            return;
-        }
+    applyFiltersBtn.addEventListener('click', async function() {
+        const selectedRegion = regionFilter.value;
+        const selectedMacroarea = macroareaFilter.value;
+        
+        await updateDashboard(selectedRegion, selectedMacroarea);
+    });
 
-        // Trasforma i dati nel formato corretto
-        const chartData = transformAPIData(apiData);
+    // Opzionale: aggiorna anche quando si cambia la selezione (senza cliccare il pulsante)
+    // Decommenta le righe seguenti se vuoi questa funzionalità
+    /*
+    regionFilter.addEventListener('change', async function() {
+        await updateDashboard(this.value, macroareaFilter.value);
+    });
 
-        // Aggiorna le KPI cards
-        updateKPICards(chartData);
-
-        // Crea tutti i grafici
-        createPieChartStato(chartData);
-        createBarChartRipartizione(chartData);
-        createHorizontalBarProgettiCostosi(chartData);
-        createHorizontalBarSettori(chartData);
-
-        console.log('Dashboard caricata con successo');
-    } catch (error) {
-        console.error('Errore durante l\'inizializzazione della dashboard:', error);
-    }
+    macroareaFilter.addEventListener('change', async function() {
+        await updateDashboard(regionFilter.value, this.value);
+    });
+    */
 });
