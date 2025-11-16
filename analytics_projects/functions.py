@@ -17,7 +17,41 @@ from django.db.models import Sum
 
 #Function that give number of not started, ended and in progress projects
 
-#Functions that give top 10 projects for financing
+def top10Projects(filters):
+    '''Functions that give top 10 projects for financing'''
+    index = 0
+    # projects row with join with funding and location 
+    projects = Project.objects.select_related("funding", "location")
+
+    region = filters.get("region")
+    if region and region != "nessun filtro":
+        projects = projects.filter(location__region=region)
+
+    macroarea = filters.get("macroarea")
+    if macroarea and macroarea != "nessun filtro":
+        projects = projects.filter(location__macroarea=macroarea)
+
+    # ---- order by financing Desc ----
+    projects = projects.order_by("-funding__total_financing")
+
+    # ---- limit 10 ----
+    projects = projects[:10]
+
+    # ---- build the output ----
+    result = {"TopProjects": {}}
+
+    for project in projects:
+        index += 1   
+
+        result["TopProjects"][f"Project{index}"] = {
+            "id": project.id,
+            "Title": project.title,
+            "TotalFinancing": project.funding.total_financing,
+            "Region": project.location.region,
+            "Macroarea": project.location.macroarea,
+        }
+
+    return result
 
 #Function that give number of big projects
 
