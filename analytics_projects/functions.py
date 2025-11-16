@@ -15,8 +15,8 @@ from django.db.models import Sum
 
 #Function that give financing of projects 
 
-#Function that give number of not started, ended and in progress projects
 def countProjectsWithStatus(filters):
+    '''Function that give number of not started, ended and in progress projects'''
     projects = Project.objects.all()
 
     # Filtri dinamici su location
