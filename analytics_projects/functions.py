@@ -11,8 +11,9 @@ from analytics_projects.models import Project, Location, Funding
 
 #to use sum on queries
 from django.db.models import Sum
-#Function that give number of projects 
+
 def countProjects(filters):
+    '''Function that give number of projects'''
     projects = Project.objects.all()
 
     region = filters.get("region")
@@ -25,10 +26,9 @@ def countProjects(filters):
 
     return projects.count()
 
-#Function that give financing of projects 
 
 def sumFundingGross(filters):
-    
+    '''Function that give financing of projects'''
     fundings = Funding.objects.all()
 
     region = filters.get("region")
