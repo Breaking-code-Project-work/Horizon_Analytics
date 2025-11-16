@@ -38,12 +38,12 @@ def top10Projects(filters):
     projects = projects[:10]
 
     # ---- build the output ----
-    result = {"TopProjects": {}}
+    top10Projects = {}
 
     for project in projects:
         index += 1   
 
-        result["TopProjects"][f"Project{index}"] = {
+        top10Projects[f"Project{index}"] = {
             "id": project.id,
             "Title": project.title,
             "TotalFinancing": project.funding.total_financing,
@@ -51,7 +51,7 @@ def top10Projects(filters):
             "Macroarea": project.location.macroarea,
         }
 
-    return result
+    return top10Projects
 
 #Function that give number of big projects
 
