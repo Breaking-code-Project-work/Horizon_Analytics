@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="../../static/css/style_visione_di_insieme.css">
+    <link rel="stylesheet" href="{% static 'css/style_visione_di_insieme.css' %}">
 </head>
 
 <body>
@@ -49,26 +49,29 @@
                     <label for="regionFilter">Regione:</label>
                     <select id="regionFilter" class="filter-select">
                         <option value="nessun filtro">Nessun Filtro</option>
-                        <option value="Abruzzo">Abruzzo</option>
-                        <option value="Basilicata">Basilicata</option>
-                        <option value="Calabria">Calabria</option>
-                        <option value="Campania">Campania</option>
-                        <option value="Emilia-Romagna">Emilia-Romagna</option>
-                        <option value="Friuli-Venezia Giulia">Friuli-Venezia Giulia</option>
-                        <option value="Lazio">Lazio</option>
-                        <option value="Liguria">Liguria</option>
-                        <option value="Lombardia">Lombardia</option>
-                        <option value="Marche">Marche</option>
-                        <option value="Molise">Molise</option>
-                        <option value="Piemonte">Piemonte</option>
-                        <option value="Puglia">Puglia</option>
-                        <option value="Sardegna">Sardegna</option>
-                        <option value="Sicilia">Sicilia</option>
-                        <option value="Toscana">Toscana</option>
-                        <option value="Trentino-Alto Adige">Trentino-Alto Adige</option>
-                        <option value="Umbria">Umbria</option>
-                        <option value="Valle d'Aosta">Valle d'Aosta</option>
-                        <option value="Veneto">Veneto</option>
+                        <option value="ABRUZZO">Abruzzo</option>
+                        <option value="BASILICATA">Basilicata</option>
+                        <option value="CALABRIA">Calabria</option>
+                        <option value="CAMPANIA">Campania</option>
+                        <option value="EMILIA-ROMAGNA">Emilia Romagna</option>
+                        <option value="FRIULI-VENEZIA GIULIA">Friuli-Venezia Giulia</option>
+                        <option value="LAZIO">Lazio</option>
+                        <option value="LIGURIA">Liguria</option>
+                        <option value="LOMBARDIA">Lombardia</option>
+                        <option value="MARCHE">Marche</option>
+                        <option value="MOLISE">Molise</option>
+                        <option value="PIEMONTE">Piemonte</option>
+                        <option value="PUGLIA">Puglia</option>
+                        <option value="SARDEGNA">Sardegna</option>
+                        <option value="SICILIA">Sicilia</option>
+                        <option value="TOSCANA">Toscana</option>
+                        <option value="TRENTINO-ALTO ADIGE">Trentino-Alto Adige</option>
+                        <option value="UMBRIA">Umbria</option>
+                        <option value="VALLE D'AOSTA">Valle d'Aosta</option>
+                        <option value="VENETO">Veneto</option>
+                        <option value="AMBITO NAZIONALE">Ambito Nazionale</option>
+                        <option value="PAESI EUROPEI">Paesi Europei</option>
+                        <option value="PAESI NON EUROPEI">Paesi non europei</option>
                     </select>
                 </div>
                 
@@ -76,8 +79,11 @@
                     <label for="macroareaFilter">Macroarea:</label>
                     <select id="macroareaFilter" class="filter-select">
                         <option value="nessun filtro">Nessun Filtro</option>
-                        <option value="centro nord">Centro Nord</option>
-                        <option value="sud">Sud</option>
+                        <option value="Centro-Nord">Centro Nord</option>
+                        <option value="Mezzogiorno">Mezzogiorno</option>
+                        <option value="Ambito Nazionale">Ambito Nazionale</option>
+                        <option value="Estero">Estero</option>
+                        <option value="Trasversale">Trasversale</option>
                     </select>
                 </div>
                 
