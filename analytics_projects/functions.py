@@ -18,11 +18,11 @@ def countProjects(filters):
 
     region = filters.get("region")
     if region and region != "nessun filtro":
-        projects = projects.filter(location__region=region).distinct()
+        projects = projects.filter(locations__region_code=region).distinct()
 
     macroarea = filters.get("macroarea")
     if macroarea and macroarea != "nessun filtro":
-        projects = projects.filter(location__macroarea=macroarea).distinct()
+        projects = projects.filter(locations__macroarea=macroarea).distinct()
 
     return projects.count()
 
@@ -35,7 +35,7 @@ def sumFundingGross(filters):
     macroarea = filters.get("macroarea")
 
     if region and region != "nessun filtro":
-        fundings = fundings.filter(project__locations__region=region)
+        fundings = fundings.filter(project__locations__region_code=region)
 
     if macroarea and macroarea != "nessun filtro":
         fundings = fundings.filter(project__locations__macroarea=macroarea)
