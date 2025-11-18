@@ -22,11 +22,11 @@ def countProjectsWithStatus(filters):
     # Filtri dinamici su location
     region = filters.get("region")
     if region and region != "nessun filtro":
-        projects = projects.filter(location__region=region).distinct()
+        projects = projects.filter(locations__region_code=region).distinct()
 
     macroarea = filters.get("macroarea")
     if macroarea and macroarea != "nessun filtro":
-        projects = projects.filter(location__macroarea=macroarea).distinct()
+        projects = projects.filter(locations__macroarea=macroarea).distinct()
 
     notStartedProjects = projects.filter(
         oc_project_status=Project.ProjectStatusChoices.NOT_STARTED
