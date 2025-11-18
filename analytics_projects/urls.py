@@ -1,8 +1,6 @@
 from django.urls import path
-from . import views
+from .views import TopSectorsAPIView
 
 urlpatterns = [
-    path('dashboard/', views.dashboard, name='dashboard'),
-
-    path('import/', views.import_csv, name='import_csv'),
+    path("api/top-sectors/", TopSectorsAPIView.as_view(), name="top-sectors")
 ]
