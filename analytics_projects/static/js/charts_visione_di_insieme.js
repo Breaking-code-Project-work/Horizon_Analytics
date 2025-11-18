@@ -472,27 +472,47 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Carica i dati iniziali
     await updateDashboard('nessun filtro', 'nessun filtro');
 
-    // Gestisci il click sul pulsante "Applica Filtri"
+    // Riferimenti agli elementi
     const applyFiltersBtn = document.getElementById('applyFilters');
     const regionFilter = document.getElementById('regionFilter');
     const macroareaFilter = document.getElementById('macroareaFilter');
 
+    // Funzione per gestire l'abilitazione/disabilitazione dei filtri
+    function handleFilterToggle() {
+        const regionValue = regionFilter.value;
+        const macroareaValue = macroareaFilter.value;
+
+        // Se regione è selezionata (diversa da "nessun filtro"), disabilita macroarea
+        if (regionValue !== 'nessun filtro') {
+            macroareaFilter.disabled = true;
+        } 
+        // Se macroarea è selezionata (diversa da "nessun filtro"), disabilita regione
+        else if (macroareaValue !== 'nessun filtro') {
+            regionFilter.disabled = true;
+        } 
+        // Se entrambe sono su "nessun filtro", abilita entrambe
+        else {
+            regionFilter.disabled = false;
+            macroareaFilter.disabled = false;
+        }
+    }
+
+    // Event listener per il cambio di selezione su Regione
+    regionFilter.addEventListener('change', function() {
+        handleFilterToggle();
+    });
+
+    // Event listener per il cambio di selezione su Macroarea
+    macroareaFilter.addEventListener('change', function() {
+        handleFilterToggle();
+    });
+
+    // Gestisci il click sul pulsante "Applica Filtri"
     applyFiltersBtn.addEventListener('click', async function() {
         const selectedRegion = regionFilter.value;
         const selectedMacroarea = macroareaFilter.value;
         
         await updateDashboard(selectedRegion, selectedMacroarea);
     });
-
-    // Opzionale: aggiorna anche quando si cambia la selezione (senza cliccare il pulsante)
-    // Decommenta le righe seguenti se vuoi questa funzionalità
-    /*
-    regionFilter.addEventListener('change', async function() {
-        await updateDashboard(this.value, macroareaFilter.value);
-    });
-
-    macroareaFilter.addEventListener('change', async function() {
-        await updateDashboard(regionFilter.value, this.value);
-    });
-    */
 });
+
