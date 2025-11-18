@@ -12,7 +12,7 @@ services:
 
   web:
     build: .
-    command: bash start.sh
+    command: /bin/bash /app/start.sh
     volumes:
       - .:/app
     ports:
