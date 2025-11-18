@@ -18,37 +18,34 @@ from django.db.models import Sum
 #Function that give number of not started, ended and in progress projects
 
 def top10Projects(filters):
-    '''Functions that give top 10 projects for financing'''
-    index = 0
-    # projects row with join with funding and location 
-    projects = Project.objects.select_related("funding", "location")
+    '''Function that returns top 10 projects by financing'''
+
+    projects = Project.objects.select_related("funding").prefetch_related("locations")
 
     region = filters.get("region")
     if region and region != "nessun filtro":
-        projects = projects.filter(location__region=region)
+        projects = projects.filter(locations__region_code=region)
 
     macroarea = filters.get("macroarea")
     if macroarea and macroarea != "nessun filtro":
-        projects = projects.filter(location__macroarea=macroarea)
+        projects = projects.filter(locations__macroarea=macroarea)
 
-    # ---- order by financing Desc ----
-    projects = projects.order_by("-funding__total_financing")
+    # ---- order by DESC and pick first 10 ----
+    projects = projects.order_by("-funding__total_financing")[:10]
 
-    # ---- limit 10 ----
-    projects = projects[:10]
-
-    # ---- build the output ----
     top10Projects = {}
-
-    for project in projects:
-        index += 1   
+    for index, project in enumerate(projects, start=1):
+        # all region in a string
+        regions_str = ", ".join([loc.region for loc in project.locations.all()])
+        # all macroaree in a string
+        macroareas_str = ", ".join([loc.macroarea for loc in project.locations.all()])
 
         top10Projects[f"Project{index}"] = {
             "id": project.id,
             "Title": project.title,
             "TotalFinancing": project.funding.total_financing,
-            "Region": project.location.region,
-            "Macroarea": project.location.macroarea,
+            "Regions": regions_str,
+            "Macroareas": macroareas_str,
         }
 
     return top10Projects
