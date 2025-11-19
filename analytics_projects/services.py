@@ -32,7 +32,7 @@ def get_top_sectors(filters):
 
     return result
 
-def top10_projects(filters):
+def top_10_projects(filters):
     '''Function that returns top 10 projects by financing'''
 
     projects = Project.objects.select_related("funding").prefetch_related("locations")

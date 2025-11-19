@@ -43,6 +43,8 @@ async function fetchDashboardData(region = 'nessun filtro', macroarea = 'nessun 
         const jsonData = await response.json();
         console.log('Risposta dal server:', jsonData);
 
+        // Nota: Django Rest Framework restituisce di solito { data: { ... } } 
+        // in base alla tua Response({"data": serializer.data})
         return jsonData.data;
     } catch (error) {
         console.error('Errore nella richiesta:', error);
@@ -52,71 +54,78 @@ async function fetchDashboardData(region = 'nessun filtro', macroarea = 'nessun 
 
 /**
  * Trasforma i dati dell'API nel formato richiesto dai grafici
+ * NOTA: Le chiavi qui sotto corrispondono ora a OverviewSerializer
  */
 function transformAPIData(apiData) {
     if (!apiData) return null;
 
+    // Helper per accedere in sicurezza agli oggetti annidati (nel caso manchino progetti)
+    const getProj = (key) => apiData.top_projects && apiData.top_projects[key] ? apiData.top_projects[key] : {};
+    const getSect = (key) => apiData.top_sectors && apiData.top_sectors[key] ? apiData.top_sectors[key] : {};
+
     return {
         kpi: {
-            totale_progetti: apiData.numProjects,
-            valore_complessivo: apiData.totalFinancing
+            totale_progetti: apiData.number_of_projects,     // Corretto da numProjects
+            valore_complessivo: apiData.total_financing      // Corretto da totalFinancing
         },
         statoAvanzamento: {
             labels: ["Conclusi", "In Corso", "Non Avviati"],
             data: [
-                apiData.numberEndedProjects,
-                apiData.numberProjectsInProgress,
-                apiData.numberNotStartedProjects
+                apiData.number_ended_projects,           // Corretto snake_case
+                apiData.number_projects_in_progress,     // Corretto snake_case
+                apiData.number_not_started_projects      // Corretto snake_case
             ]
         },
         ripartizione: {
             labels: ["Mezzogiorno", "Centro-Nord"],
             data: [
-                apiData.MiddayFinancing,
-                apiData.MiddleNorthFinancing
+                apiData.midday_financing,        // Corretto da MiddayFinancing
+                apiData.middle_north_financing   // Corretto da MiddleNorthFinancing
             ]
         },
         progettiCostosi: {
+            // Il Serializer restituisce oggetti { title: "...", total_financing: ... }, non array [0], [1]
             labels: [
-                apiData.TopProjects.Project1[0] || "Progetto 1",
-                apiData.TopProjects.Project2[0] || "Progetto 2",
-                apiData.TopProjects.Project3[0] || "Progetto 3",
-                apiData.TopProjects.Project4[0] || "Progetto 4",
-                apiData.TopProjects.Project5[0] || "Progetto 5",
-                apiData.TopProjects.Project6[0] || "Progetto 6",
-                apiData.TopProjects.Project7[0] || "Progetto 7",
-                apiData.TopProjects.Project8[0] || "Progetto 8",
-                apiData.TopProjects.Project9[0] || "Progetto 9",
-                apiData.TopProjects.Project10[0] || "Progetto 10"
+                getProj('Project1').title || "Progetto 1",
+                getProj('Project2').title || "Progetto 2",
+                getProj('Project3').title || "Progetto 3",
+                getProj('Project4').title || "Progetto 4",
+                getProj('Project5').title || "Progetto 5",
+                getProj('Project6').title || "Progetto 6",
+                getProj('Project7').title || "Progetto 7",
+                getProj('Project8').title || "Progetto 8",
+                getProj('Project9').title || "Progetto 9",
+                getProj('Project10').title || "Progetto 10"
             ],
             data: [
-                apiData.TopProjects.Project1[1] || 0,
-                apiData.TopProjects.Project2[1] || 0,
-                apiData.TopProjects.Project3[1] || 0,
-                apiData.TopProjects.Project4[1] || 0,
-                apiData.TopProjects.Project5[1] || 0,
-                apiData.TopProjects.Project6[1] || 0,
-                apiData.TopProjects.Project7[1] || 0,
-                apiData.TopProjects.Project8[1] || 0,
-                apiData.TopProjects.Project9[1] || 0,
-                apiData.TopProjects.Project10[1] || 0
+                getProj('Project1').total_financing || 0,
+                getProj('Project2').total_financing || 0,
+                getProj('Project3').total_financing || 0,
+                getProj('Project4').total_financing || 0,
+                getProj('Project5').total_financing || 0,
+                getProj('Project6').total_financing || 0,
+                getProj('Project7').total_financing || 0,
+                getProj('Project8').total_financing || 0,
+                getProj('Project9').total_financing || 0,
+                getProj('Project10').total_financing || 0
             ]
         },
         settori: {
+            // Il Serializer restituisce oggetti { name: "...", total_financing: ... }
             labels: [
-                apiData.TopSectors.Sector1[0] || "Settore 1",
-                apiData.TopSectors.Sector2[0] || "Settore 2",
-                apiData.TopSectors.Sector3[0] || "Settore 3"
+                getSect('Sector1').name || "Settore 1",
+                getSect('Sector2').name || "Settore 2",
+                getSect('Sector3').name || "Settore 3"
             ],
             data: [
-                apiData.TopSectors.Sector1[1] || 0,
-                apiData.TopSectors.Sector2[1] || 0,
-                apiData.TopSectors.Sector3[1] || 0
+                getSect('Sector1').total_financing || 0,
+                getSect('Sector2').total_financing || 0,
+                getSect('Sector3').total_financing || 0
             ]
         },
         grandiProgetti: {
             labels: ["Totale"],
-            data: [apiData.numberBigProjects]
+            data: [apiData.number_big_projects] // Corretto da numberBigProjects
         }
     };
 }
@@ -149,6 +158,9 @@ function formatNumber(value) {
 // ==========================================
 
 function updateKPICards(data) {
+    // Controllo di sicurezza se i dati sono nulli
+    if (!data) return; 
+    
     document.getElementById('totale-progetti').textContent = formatNumber(data.kpi.totale_progetti);
     document.getElementById('valore-complessivo').textContent = formatCurrency(data.kpi.valore_complessivo);
     document.getElementById('territorio-label').textContent = data.grandiProgetti.labels[0];
@@ -205,7 +217,8 @@ function createPieChartStato(data) {
                             const label = context.label || '';
                             const value = context.parsed || 0;
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
+                            // Evita divisione per zero
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
                             return `${label}: ${formatNumber(value)} (${percentage}%)`;
                         }
                     }
@@ -477,22 +490,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     const regionFilter = document.getElementById('regionFilter');
     const macroareaFilter = document.getElementById('macroareaFilter');
 
-    applyFiltersBtn.addEventListener('click', async function() {
-        const selectedRegion = regionFilter.value;
-        const selectedMacroarea = macroareaFilter.value;
-        
-        await updateDashboard(selectedRegion, selectedMacroarea);
-    });
-
-    // Opzionale: aggiorna anche quando si cambia la selezione (senza cliccare il pulsante)
-    // Decommenta le righe seguenti se vuoi questa funzionalità
-    /*
-    regionFilter.addEventListener('change', async function() {
-        await updateDashboard(this.value, macroareaFilter.value);
-    });
-
-    macroareaFilter.addEventListener('change', async function() {
-        await updateDashboard(regionFilter.value, this.value);
-    });
-    */
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', async function() {
+            const selectedRegion = regionFilter.value;
+            const selectedMacroarea = macroareaFilter.value;
+            
+            await updateDashboard(selectedRegion, selectedMacroarea);
+        });
+    }
 });

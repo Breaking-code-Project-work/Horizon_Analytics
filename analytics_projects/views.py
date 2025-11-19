@@ -7,6 +7,9 @@ from .serializers import OverviewSerializer
 from .services import *
 
 class OverviewAPI(APIView):
+    """
+    API that recieve filters from frontend and give as output a Jason called data
+    """
     def dashboard(request):
         return render(request, 'analytics_projects/dashboard.html')
 
@@ -36,10 +39,7 @@ class OverviewAPI(APIView):
             return HttpResponse("CSV importato con successo!")
         return render(request, 'analytics_projects/import_csv.html')
 
-class OverviewAPI(APIView):
-    """
-    API that recieve filters from frontend and give as output a Jason called data
-    """
+
     def get(self, request):
         # Recover filters from query string
         region = request.query_params.get("region")
@@ -59,8 +59,8 @@ class OverviewAPI(APIView):
                 "macroarea": macroarea
             },
 
-            "num_of_projects": num_projects_with_status['total'],
-            "total_financing": sum_funding_gross('filters'),
+            "number_of_projects": num_projects_with_status['total'],
+            "total_financing": sum_funding_gross(filters),
             "number_ended_projects": num_projects_with_status['concluded'],
             "number_not_started_projects": num_projects_with_status['not_started'],
             "number_projects_in_progress": num_projects_with_status['in_progress'],
@@ -70,7 +70,7 @@ class OverviewAPI(APIView):
             "national_financing": macroarea_financing['Ambito Nazionale'],
             "abroad_financing": macroarea_financing['Estero'],
             "trasversal_financing": macroarea_financing['Trasversale'],
-            "top_projects": top10_projects(filters),
+            "top_projects": top_10_projects(filters),
             "number_big_projects": count_big_projects(filters),
             "top_sectors": get_top_sectors(filters)
         }
