@@ -7,7 +7,7 @@ class FiltersOverviewSerializer(serializers.Serializer):
 class ProjectSerializer(serializers.Serializer):
     id = serializers.CharField()
     title = serializers.CharField()
-    totalFinancing = serializers.FloatField()
+    total_financing = serializers.FloatField()
     region = serializers.CharField()
     macroarea = serializers.CharField()
 
@@ -16,23 +16,23 @@ class TopProjectsSerializer(serializers.DictField):
 
 class SectorSerializer(serializers.Serializer):
     name = serializers.CharField()
-    totalfinancing = serializers.FloatField()
+    total_financing = serializers.FloatField()
 
 class TopSectorsSerializer(serializers.DictField):
     child = SectorSerializer()
 
 class OverviewSerializer(serializers.Serializer):
     filters = FiltersOverviewSerializer()
-    numberOfProjects = serializers.IntegerField()
-    totalFinancing = serializers.FloatField()
-    numberEndedProjects = serializers.IntegerField()
-    numberNotStartedProjects = serializers.IntegerField()
-    numberProjectsInProgress = serializers.IntegerField()
-    middayFinancing = serializers.FloatField()
-    middleNorthFinancing = serializers.FloatField()
-    nationalFinancing = serializers.FloatField()
-    abroadFinancing = serializers.FloatField()
-    trasversalFinancing = serializers.FloatField()
-    topProjects = TopProjectsSerializer()
-    numberBigProjects = serializers.IntegerField()
-    topSectors = TopSectorsSerializer()
+    number_of_projects = serializers.IntegerField()
+    total_financing = serializers.FloatField()
+    number_ended_projects = serializers.IntegerField()
+    number_not_started_projects = serializers.IntegerField()
+    number_projects_in_progress = serializers.IntegerField()
+    midday_financing = serializers.FloatField()
+    middle_north_financing = serializers.FloatField()
+    national_financing = serializers.FloatField()
+    abroad_financing = serializers.FloatField()
+    trasversal_financing = serializers.FloatField()
+    top_projects = TopProjectsSerializer()
+    number_big_projects = serializers.IntegerField()
+    top_sectors = TopSectorsSerializer()
