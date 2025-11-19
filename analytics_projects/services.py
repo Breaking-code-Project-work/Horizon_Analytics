@@ -10,4 +10,12 @@ def get_top_sectors(filters):
         total=Sum("total_funds_gross")
     ).order_by("-total")[:3]
 
-    return [{"sector": x["project__cup_descr_sector"], "total": x["total"]} for x in qs]
+    result = {}
+
+    for i, x in enumerate(qs, start=1):
+        result[f"Sector{i}"] = {
+            "name": x["project__cup_descr_sector"],
+            "total_financing": x["total"]
+        }
+
+    return result

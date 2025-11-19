@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import TopSectorsAPIView
+from .views import OverviewAPI
 
 urlpatterns = [
-    path("api/top-sectors/", TopSectorsAPIView.as_view(), name="top-sectors")
+    path("api/top-sectors/", OverviewAPI.as_view(), name="top-sectors")
 ]
