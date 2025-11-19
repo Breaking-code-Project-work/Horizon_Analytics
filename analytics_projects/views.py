@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from serializers import OverviewSerializer
 #here go the import for backend script
 
 class OverviewAPI(APIView):
@@ -41,40 +42,39 @@ class OverviewAPI(APIView):
         Sector2 = []
         Sector3 = []
         # Answer JSON
-        response_data = {
-             "data": {
-                "filters": {
-                    "region": region,
-                    "macroarea": macroarea
-                },
+        data = {
+            "filters": {
+                "region": region,
+                "macroarea": macroarea
+            },
 
-                "numProjects": numProjects,    
-                "totalFinancing": totalFinancing,  
-                "numberEndedProjects": numberEndedProjects,  
-                "numberNotStartedProjects": numberNotStartedProjects,  
-                "numberProjectsInProgress": numberProjectsInProgress,  
-                "MiddayFinancing": MiddayFinancing,  
-                "MiddleNorthFinancing": MiddleNorthFinancing,  
-                "TopProjects": {  
-                    "Project1": Project1,  
-                    "Project2": Project2,  
-                    "Project3": Project3,  
-                    "Project4": Project4,
-                    "Project5": Project5,
-                    "Project6": Project6,
-                    "Project7": Project7,
-                    "Project8": Project8,
-                    "Project9": Project9,
-                    "Project10": Project10
-                    },  
-                "numberBigProjects": numberBigProjects,  
-                "TopSectors": {  
-                    "Sector1": Sector1,  
-                    "Sector2": Sector2,  
-                    "Sector3": Sector3  
-                }  
-            } 
+            "numProjects": numProjects,    
+            "totalFinancing": totalFinancing,  
+            "numberEndedProjects": numberEndedProjects,  
+            "numberNotStartedProjects": numberNotStartedProjects,  
+            "numberProjectsInProgress": numberProjectsInProgress,  
+            "MiddayFinancing": MiddayFinancing,  
+            "MiddleNorthFinancing": MiddleNorthFinancing,  
+            "TopProjects": {  
+                "Project1": Project1,  
+                "Project2": Project2,  
+                "Project3": Project3,  
+                "Project4": Project4,
+                "Project5": Project5,
+                "Project6": Project6,
+                "Project7": Project7,
+                "Project8": Project8,
+                "Project9": Project9,
+                "Project10": Project10
+                },  
+            "numberBigProjects": numberBigProjects,  
+            "TopSectors": {  
+                "Sector1": Sector1,  
+                "Sector2": Sector2,  
+                "Sector3": Sector3  
+            }  
         }
 
-        return Response(response_data, status=status.HTTP_200_OK)
+        serializer = OverviewSerializer(data)
+        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
     
