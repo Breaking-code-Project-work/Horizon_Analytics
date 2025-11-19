@@ -6,30 +6,33 @@ class FiltersOverviewSerializer(serializers.Serializer):
 
 class ProjectSerializer(serializers.Serializer):
     id = serializers.CharField()
-    Title = serializers.CharField()
-    TotalFinancing = serializers.FloatField()
-    Region = serializers.CharField()
-    Macroarea = serializers.CharField()
+    title = serializers.CharField()
+    totalFinancing = serializers.FloatField()
+    region = serializers.CharField()
+    macroarea = serializers.CharField()
 
 class TopProjectsSerializer(serializers.DictField):
     child = ProjectSerializer()
 
 class SectorSerializer(serializers.Serializer):
-    Name = serializers.CharField()
-    Totalfinancing = serializers.FloatField()
+    name = serializers.CharField()
+    totalfinancing = serializers.FloatField()
 
 class TopSectorsSerializer(serializers.DictField):
     child = SectorSerializer()
 
 class OverviewSerializer(serializers.Serializer):
-    Filters = FiltersOverviewSerializer()
+    filters = FiltersOverviewSerializer()
     numberOfProjects = serializers.IntegerField()
     totalFinancing = serializers.FloatField()
     numberEndedProjects = serializers.IntegerField()
     numberNotStartedProjects = serializers.IntegerField()
     numberProjectsInProgress = serializers.IntegerField()
-    MiddayFinancing = serializers.FloatField()
-    MiddleNorthFinancing = serializers.FloatField()
-    TopProjects = TopProjectsSerializer()
+    middayFinancing = serializers.FloatField()
+    middleNorthFinancing = serializers.FloatField()
+    nationalFinancing = serializers.FloatField()
+    abroadFinancing = serializers.FloatField()
+    trasversalFinancing = serializers.FloatField()
+    topProjects = TopProjectsSerializer()
     numberBigProjects = serializers.IntegerField()
-    TopSectors = TopSectorsSerializer()
+    topSectors = TopSectorsSerializer()
