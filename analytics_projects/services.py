@@ -40,12 +40,12 @@ def top10Projects(filters):
         # all macroaree in a string
         macroareas_str = ", ".join([loc.macroarea for loc in project.locations.all()])
 
-        top10Projects[f"Project{index}"] = {
+        top10Projects[f"project{index}"] = {
             "id": project.id,
-            "Title": project.title,
-            "TotalFinancing": project.funding.total_financing,
-            "Regions": regions_str,
-            "Macroareas": macroareas_str,
+            "title": project.title,
+            "totalFinancing": project.funding.total_financing,
+            "region": regions_str,
+            "macroarea": macroareas_str,
         }
 
     return top10Projects
