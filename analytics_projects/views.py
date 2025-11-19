@@ -1,45 +1,40 @@
-from rest_framework.response import Response
+from django.shortcuts import render
+from django.http import HttpResponse
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import status
 from .serializers import OverviewSerializer
 from .services import *
 
-
 class OverviewAPI(APIView):
-    from django.shortcuts import render
-    from django.http import HttpResponse
-    from rest_framework.views import APIView
-    from rest_framework.response import Response
-    from rest_framework import status
+    def dashboard(request):
+        return render(request, 'analytics_projects/dashboard.html')
 
-def dashboard(request):
-    return render(request, 'analytics_projects/dashboard.html')
+    def visione_di_insieme_page(request):
+        return render(request, 'analytics_projects/visione_di_insieme_page.html')
 
-def visione_di_insieme_page(request):
-    return render(request, 'analytics_projects/visione_di_insieme_page.html')
+    def analisi_finanziaria_page(request):
+        return render(request, 'analytics_projects/analisi_finanziaria_page.html')
 
-def analisi_finanziaria_page(request):
-    return render(request, 'analytics_projects/analisi_finanziaria_page.html')
+    def analisi_settoriale_page(request):
+        return render(request, 'analytics_projects/analisi_settoriale_page.html')
 
-def analisi_settoriale_page(request):
-    return render(request, 'analytics_projects/analisi_settoriale_page.html')
+    def anomalie_page(request):
+        return render(request, 'analytics_projects/anomalie_page.html')
 
-def anomalie_page(request):
-    return render(request, 'analytics_projects/anomalie_page.html')
+    def beneficiari_page(request):
+        return render(request, 'analytics_projects/beneficiari_page.html')
 
-def beneficiari_page(request):
-    return render(request, 'analytics_projects/beneficiari_page.html')
+    def efficienza_e_performance_page(request):
+        return render(request, 'analytics_projects/efficienza_e_performance_page.html')
 
-def efficienza_e_performance_page(request):
-    return render(request, 'analytics_projects/efficienza_e_performance_page.html')
+    def territori_e_attori_page(request):
+        return render(request, 'analytics_projects/territori_e_attori_page.html')
 
-def territori_e_attori_page(request):
-    return render(request, 'analytics_projects/territori_e_attori_page.html')
-
-def import_csv(request):
-    if request.method == 'POST':
-        return HttpResponse("CSV importato con successo!")
-    return render(request, 'analytics_projects/import_csv.html')
+    def import_csv(request):
+        if request.method == 'POST':
+            return HttpResponse("CSV importato con successo!")
+        return render(request, 'analytics_projects/import_csv.html')
 
 class OverviewAPI(APIView):
     """
