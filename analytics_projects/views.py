@@ -1,3 +1,11 @@
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+from .serializers import OverviewSerializer
+from .services import get_top_sectors
+
+
+class OverviewAPI(APIView):
 from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.views import APIView
@@ -48,7 +56,7 @@ class OverviewAPI(APIView):
         }
 
         # variabiles of back end
-        numProjects = 1          
+        numProjects = 1
         totalFinancing = 1
         numberEndedProjects = 1
         numberNotStartedProjects = 1
@@ -79,17 +87,17 @@ class OverviewAPI(APIView):
                     "macroarea": macroarea
                 },
 
-                "numProjects": numProjects,    
-                "totalFinancing": totalFinancing,  
-                "numberEndedProjects": numberEndedProjects,  
-                "numberNotStartedProjects": numberNotStartedProjects,  
-                "numberProjectsInProgress": numberProjectsInProgress,  
-                "MiddayFinancing": MiddayFinancing,  
-                "MiddleNorthFinancing": MiddleNorthFinancing,  
-                "TopProjects": {  
-                    "Project1": Project1,  
-                    "Project2": Project2,  
-                    "Project3": Project3,  
+                "numProjects": numProjects,
+                "totalFinancing": totalFinancing,
+                "numberEndedProjects": numberEndedProjects,
+                "numberNotStartedProjects": numberNotStartedProjects,
+                "numberProjectsInProgress": numberProjectsInProgress,
+                "MiddayFinancing": MiddayFinancing,
+                "MiddleNorthFinancing": MiddleNorthFinancing,
+                "TopProjects": {
+                    "Project1": Project1,
+                    "Project2": Project2,
+                    "Project3": Project3,
                     "Project4": Project4,
                     "Project5": Project5,
                     "Project6": Project6,
@@ -97,15 +105,15 @@ class OverviewAPI(APIView):
                     "Project8": Project8,
                     "Project9": Project9,
                     "Project10": Project10
-                    },  
-                "numberBigProjects": numberBigProjects,  
-                "TopSectors": {  
-                    "Sector1": Sector1,  
-                    "Sector2": Sector2,  
-                    "Sector3": Sector3  
-                }  
-            } 
+                    },
+                "numberBigProjects": numberBigProjects,
+                "TopSectors": {
+                    "Sector1": Sector1,
+                    "Sector2": Sector2,
+                    "Sector3": Sector3
+                }
+            }
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-    
+

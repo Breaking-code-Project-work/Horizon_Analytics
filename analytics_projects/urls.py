@@ -4,8 +4,7 @@ from . import views
 
 urlpatterns = [
     path('api/overview/', OverviewAPI.as_view(), name='overview-api'), #url of API
-    path('dashboard/', views.dashboard, name='dashboard'), #url of dashboard
-    path('import/', views.import_csv, name='import_csv'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('visione_di_insieme_page/', views.visione_di_insieme_page, name='visione_di_insieme_page'), #url of visione d'insieme
     path('analisi_finanziaria_page/', views.analisi_finanziaria_page, name='analisi_finanziaria_page'), #url of analisi finanziaria
     path('analisi_settoriale_page/', views.analisi_settoriale_page, name='analisi_settoriale_page'), #url of analisi settoriale
