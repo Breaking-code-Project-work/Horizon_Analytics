@@ -2,17 +2,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import OverviewSerializer
-from .services import get_top_sectors
+from .services import *
 
 
 class OverviewAPI(APIView):
-from django.shortcuts import render
-from django.http import HttpResponse
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from serializers import OverviewSerializer
-from services import *
+    from django.shortcuts import render
+    from django.http import HttpResponse
+    from rest_framework.views import APIView
+    from rest_framework.response import Response
+    from rest_framework import status
 
 def dashboard(request):
     return render(request, 'analytics_projects/dashboard.html')
@@ -56,8 +54,8 @@ class OverviewAPI(APIView):
             "macroarea": macroarea
         }
 
-        numProjectswithstatus = countProjectsWithStatus(filters)
-        macroareaFinancing = fundingByMacroarea(filters)
+        num_projects_with_status = count_projects_with_status(filters)
+        macroarea_financing = funding_by_macroarea(filters)
 
         # Answer JSON
         data = {
@@ -66,20 +64,20 @@ class OverviewAPI(APIView):
                 "macroarea": macroarea
             },
 
-            "numProjects": countProjects(filters),
-            "totalFinancing": numProjectswithstatus['total'],
-            "numberEndedProjects": numProjectswithstatus['concluded'],
-            "numberNotStartedProjects": numProjectswithstatus['not_started'],
-            "numberProjectsInProgress": numProjectswithstatus['in_progress'],
-            "numberProjectsLiquidated": numProjectswithstatus['liquidated'],
-            "middleNorthFinancing": macroareaFinancing['Centro-Nord'],
-            "middayFinancing": macroareaFinancing['Mezzogiorno'],
-            "nationalFinancing": macroareaFinancing['Ambito Nazionale'],
-            "abroadFinancing": macroareaFinancing['Estero'],
-            "trasversalFinancing": macroareaFinancing['Trasversale'],
-            "topProjects": top10Projects(filters),
-            "numberBigProjects": countBigProjects(filters),
-            "topSectors": get_top_sectors(filters)
+            "num_of_projects": num_projects_with_status['total'],
+            "total_financing": sum_funding_gross('filters'),
+            "number_ended_projects": num_projects_with_status['concluded'],
+            "number_not_started_projects": num_projects_with_status['not_started'],
+            "number_projects_in_progress": num_projects_with_status['in_progress'],
+            "number_projects_liquidated": num_projects_with_status['liquidated'],
+            "middle_north_financing": macroarea_financing['Centro-Nord'],
+            "midday_financing": macroarea_financing['Mezzogiorno'],
+            "national_financing": macroarea_financing['Ambito Nazionale'],
+            "abroad_financing": macroarea_financing['Estero'],
+            "trasversal_financing": macroarea_financing['Trasversale'],
+            "top_projects": top10_projects(filters),
+            "number_big_projects": count_big_projects(filters),
+            "top_sectors": get_top_sectors(filters)
         }
 
         serializer = OverviewSerializer(data)

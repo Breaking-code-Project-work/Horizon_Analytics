@@ -32,7 +32,7 @@ def get_top_sectors(filters):
 
     return result
 
-def top10Projects(filters):
+def top10_projects(filters):
     '''Function that returns top 10 projects by financing'''
 
     projects = Project.objects.select_related("funding").prefetch_related("locations")
@@ -65,7 +65,7 @@ def top10Projects(filters):
 
     return top_10_projects
 
-def countBigProjects(filters):
+def count_big_projects(filters):
     '''Function that give number of big projects'''
     big_project_threshold = 50_000_000
     projects = Project.objects.all()
@@ -84,7 +84,7 @@ def countBigProjects(filters):
 
     return projects.count()
 
-def fundingByMacroarea(filters):
+def funding_by_macroarea(filters):
     '''Function that returns the finances given to a specific macroarea'''
     fundings = Funding.objects.all()
 
@@ -108,7 +108,7 @@ def fundingByMacroarea(filters):
         for item in result
     }
 
-def countProjectsWithStatus(filters):
+def count_projects_with_status(filters):
     '''Function that give number of not started, ended and in progress projects'''
     projects = Project.objects.all()
 
@@ -145,7 +145,7 @@ def countProjectsWithStatus(filters):
         "liquidated": liquidated_projects.count()
     }
 
-def sumFundingGross(filters):
+def sum_funding_gross(filters):
     '''Function that give financing of projects'''
     fundings = Funding.objects.all()
 
