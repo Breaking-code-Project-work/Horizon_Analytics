@@ -90,12 +90,12 @@ class Location(models.Model):
 
     # 1. Definition of enum of 'macroarea'
     class MacroAreaChoices(models.TextChoices):
-        OTHER = 'ALTRO', 'ALTRO'
-        NATIONAL_SCOPE = 'AMBITO NAZIONALE', 'AMBITO NAZIONALE'
-        MIDDLE_NORTH = 'CENTRO-NORD', 'CENTRO-NORD'
-        ABROAD = 'ESTERO', 'ESTERO'
-        MIDDAY = 'MEZZOGIORNO', 'MEZZOGIORNO'
-        TRASVERSAL = 'TRASVERSALE', 'TRASVERSALE'
+        OTHER = 'Altro', 'Altro'
+        NATIONAL_SCOPE = 'Ambito Nazionale', 'Ambito Nazionale'
+        MIDDLE_NORTH = 'Centro-Nord', 'Centro-Nord'
+        ABROAD = 'Estero', 'Estero'
+        MIDDAY = 'Mezzogiorno', 'Mezzogiorno'
+        TRASVERSAL = 'Traversale', 'Trasversale'
     region_code = models.CharField(max_length=20, primary_key = True)
     region_name = models.CharField(max_length=50)
     macroarea = models.CharField(
