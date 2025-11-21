@@ -111,6 +111,7 @@ def load_projects_into_db(projects_data):
             region_name = data.get("DEN_REGIONE", "").strip()
             macroarea = data.get("OC_MACROAREA", "ALTRO").strip()
 
+
             location, created = Location.objects.get_or_create(
                 region_code=region_code,
                 defaults={

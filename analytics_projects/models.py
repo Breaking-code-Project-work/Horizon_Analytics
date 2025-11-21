@@ -38,7 +38,7 @@ class Project(models.Model):
 
 
 class Funding(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="funding")
 
     # Public funds
     eu_funds = models.FloatField(default=0)  # FINANZ_UE

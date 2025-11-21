@@ -35,11 +35,12 @@ def import_csv(request):
         return HttpResponse("CSV importato con successo!")
     return render(request, 'analytics_projects/import_csv.html')
 
+
 class OverviewAPI(APIView):
     """
-    API that recieve filters from frontend and give as output a Jason called data
+    API that receives filters from frontend and returns a JSON called data
     """
-    
+
     def get(self, request):
         # Recover filters from query string
         region = request.query_params.get("region")
@@ -52,13 +53,12 @@ class OverviewAPI(APIView):
         num_projects_with_status = count_projects_with_status(filters)
         macroarea_financing = funding_by_macroarea(filters)
 
-        # Answer JSON
+        # Prepare JSON
         data = {
             "filters": {
                 "region": region,
                 "macroarea": macroarea
             },
-
             "number_of_projects": num_projects_with_status.get('total', 0),
             "total_financing": sum_funding_gross(filters),
             "number_ended_projects": num_projects_with_status.get('concluded', 0),
@@ -75,6 +75,6 @@ class OverviewAPI(APIView):
             "top_sectors": get_top_sectors(filters)
         }
 
+        # Pass the already-prepared dictionary directly to the serializer
         serializer = OverviewSerializer(data)
         return Response({"data": serializer.data}, status=status.HTTP_200_OK)
-    

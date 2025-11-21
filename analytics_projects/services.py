@@ -1,104 +1,96 @@
 import os
 import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'horizon_analytics.settings')
-
-# Initialize Django
-django.setup()
-
-# import models
-from analytics_projects.models import Project, Location, Funding
-
-#to use sum on queries
 from django.db.models import Sum
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'horizon_analytics.settings')
+django.setup()
+
+from analytics_projects.models import Project, Funding
+
+# ------------------------------
+# Funzione base per filtrare progetti
+# ------------------------------
+def get_filtered_projects(filters):
+    """Restituisce i progetti filtrati per regione e macroarea, con total_financing annotato."""
+    region = filters.get("region")
+    macroarea = filters.get("macroarea")
+
+    projects_qs = Project.objects.prefetch_related("locations").annotate(
+        total_financing=Sum("funding__total_funds_gross")
+    )
+
+    if region and region != "nessun filtro":
+        projects_qs = projects_qs.filter(locations__region_code=region)
+
+    if macroarea and macroarea != "nessun filtro":
+        projects_qs = projects_qs.filter(locations__macroarea=macroarea)
+
+    return projects_qs.distinct()
+
+
+# ------------------------------
+# Top 10 progetti per finanziamento
+# ------------------------------
+def top_10_projects(filters):
+    projects_qs = get_filtered_projects(filters)
+
+    top_projects_qs = projects_qs.order_by("-total_financing")[:10]
+
+    result = {}
+    for index, project in enumerate(top_projects_qs, start=1):
+        regions_str = ", ".join([loc.region_name for loc in project.locations.all()])
+        macroareas_str = ", ".join([loc.macroarea for loc in project.locations.all()])
+
+        result[f"project{index}"] = {
+            "id": project.local_project_code,
+            "title": project.oc_project_title,
+            "total_financing": project.total_financing or 0,
+            "region": regions_str,
+            "macroarea": macroareas_str,
+        }
+
+    return result
+
+
+# ------------------------------
+# Top 3 settori per finanziamento
+# ------------------------------
 def get_top_sectors(filters):
-    '''function that give top 3 sectors'''
-    projects = Funding.objects.filter(
-        project__in=Project.objects.filter(**filters)
-    ).values(
+    projects_qs = get_filtered_projects(filters)
+
+    fundings = Funding.objects.filter(project__in=projects_qs).values(
         "project__cup_descr_sector"
     ).annotate(
         total=Sum("total_funds_gross")
     ).order_by("-total")[:3]
 
     result = {}
-
-    for i, x in enumerate(projects, start=1):
+    for i, x in enumerate(fundings, start=1):
         result[f"Sector{i}"] = {
             "name": x["project__cup_descr_sector"],
-            "total_financing": x["total"]
+            "total_financing": x["total"] or 0
         }
 
     return result
 
-def top_10_projects(filters):
-    '''Function that returns top 10 projects by financing'''
 
-    projects = Project.objects.select_related("funding").prefetch_related("locations")
-
-    region = filters.get("region")
-    if region and region != "nessun filtro":
-        projects = projects.filter(locations__region_code=region)
-
-    macroarea = filters.get("macroarea")
-    if macroarea and macroarea != "nessun filtro":
-        projects = projects.filter(locations__macroarea=macroarea)
-
-    # ---- order by DESC and pick first 10 ----
-    projects = projects.order_by("-funding__total_financing")[:10]
-
-    top_10_projects = {}
-    for index, project in enumerate(projects, start=1):
-        # all region in a string
-        regions_str = ", ".join([loc.region for loc in project.locations.all()])
-        # all macroaree in a string
-        macroareas_str = ", ".join([loc.macroarea for loc in project.locations.all()])
-
-        top_10_projects[f"project{index}"] = {
-            "id": project.id,
-            "title": project.title,
-            "total_financing": project.funding.total_financing,
-            "region": regions_str,
-            "macroarea": macroareas_str,
-        }
-
-    return top_10_projects
-
+# ------------------------------
+# Numero di progetti grandi (>50M)
+# ------------------------------
 def count_big_projects(filters):
-    '''Function that give number of big projects'''
+    projects_qs = get_filtered_projects(filters)
     big_project_threshold = 50_000_000
-    projects = Project.objects.all()
 
-    region = filters.get("region")
-    if region and region != "nessun filtro":
-        # Filter projects by region code
-        projects = projects.filter(locations__region_code=region).distinct()
+    return projects_qs.filter(funding__total_funds_gross__gte=big_project_threshold).distinct().count()
 
-    macroarea = filters.get("macroarea")
-    if macroarea and macroarea != "nessun filtro":
-        projects = projects.filter(locations__macroarea=macroarea).distinct()
 
-    # total_funds_gross >= 50 000 000
-    projects = projects.filter(funding__total_funds_gross__gte=big_project_threshold).distinct()
-
-    return projects.count()
-
+# ------------------------------
+# Finanziamenti per macroarea
+# ------------------------------
 def funding_by_macroarea(filters):
-    '''Function that returns the finances given to a specific macroarea'''
-    fundings = Funding.objects.all()
+    projects_qs = get_filtered_projects(filters)
+    fundings = Funding.objects.filter(project__in=projects_qs).distinct()
 
-    region = filters.get("region")
-    if region and region != "nessun filtro":
-        fundings = fundings.filter(project__locations__region_code=region)
-
-    macroarea = filters.get("macroarea")
-    if macroarea and macroarea != "nessun filtro":
-        fundings = fundings.filter(project__locations__macroarea=macroarea)
-
-    fundings = fundings.distinct()
-
-    # total sum of macroarea
     result = fundings.values("project__locations__macroarea").annotate(
         total=Sum("total_funds_gross")
     )
@@ -108,58 +100,44 @@ def funding_by_macroarea(filters):
         for item in result
     }
 
+
+# ------------------------------
+# Conteggio progetti per stato
+# ------------------------------
 def count_projects_with_status(filters):
-    '''Function that give number of not started, ended and in progress projects'''
-    projects = Project.objects.all()
+    projects_qs = get_filtered_projects(filters)
 
-    # filters
-    region = filters.get("region")
-    if region and region != "nessun filtro":
-        projects = projects.filter(locations__region_code=region).distinct()
-
-    macroarea = filters.get("macroarea")
-    if macroarea and macroarea != "nessun filtro":
-        projects = projects.filter(locations__macroarea=macroarea).distinct()
-    not_started_projects = projects.filter(
+    not_started_projects = projects_qs.filter(
         oc_project_status=Project.ProjectStatusChoices.NOT_STARTED
     ).distinct()
 
-    in_progress_projects = projects.filter(
+    in_progress_projects = projects_qs.filter(
         oc_project_status=Project.ProjectStatusChoices.ONGOING
     ).distinct()
 
-    concluded_projects = projects.filter(
+    concluded_projects = projects_qs.filter(
         oc_project_status=Project.ProjectStatusChoices.CONCLUDED
     ).distinct()
 
-    liquidated_projects = projects.filter(
+    liquidated_projects = projects_qs.filter(
         oc_project_status=Project.ProjectStatusChoices.LIQUIDATED
     ).distinct()
 
-        # give count of projects of all status
     return {
-        "total": projects.count(),
+        "total": projects_qs.count(),
         "not_started": not_started_projects.count(),
         "in_progress": in_progress_projects.count(),
         "concluded": concluded_projects.count(),
         "liquidated": liquidated_projects.count()
     }
 
+
+# ------------------------------
+# Somma totale dei finanziamenti
+# ------------------------------
 def sum_funding_gross(filters):
-    '''Function that give financing of projects'''
-    fundings = Funding.objects.all()
-
-    region = filters.get("region")
-    macroarea = filters.get("macroarea")
-
-    if region and region != "nessun filtro":
-        fundings = fundings.filter(project__locations__region_code=region)
-
-    if macroarea and macroarea != "nessun filtro":
-        fundings = fundings.filter(project__locations__macroarea=macroarea)
-
-    fundings = fundings.distinct()
+    projects_qs = get_filtered_projects(filters)
+    fundings = Funding.objects.filter(project__in=projects_qs).distinct()
 
     result = fundings.aggregate(total_gross=Sum('total_funds_gross'))
-
     return result['total_gross'] or 0
