@@ -1,9 +1,11 @@
 from django.urls import path
 from .views import OverviewAPI
+from django.contrib import admin
 from . import views
 
 urlpatterns = [
     path('api/overview/', OverviewAPI.as_view(), name='overview-api'), #url of API
+    path('admin/', admin.site.urls),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('visione_di_insieme_page/', views.visione_di_insieme_page, name='visione_di_insieme_page'), #url of visione d'insieme
     path('analisi_finanziaria_page/', views.analisi_finanziaria_page, name='analisi_finanziaria_page'), #url of analisi finanziaria
