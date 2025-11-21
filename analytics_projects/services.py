@@ -5,7 +5,7 @@ from django.db.models import Sum
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'horizon_analytics.settings')
 django.setup()
 
-from analytics_projects.models import Project, Funding
+from analytics_projects.models import Project, Funding, Location
 
 # ------------------------------
 # Funzione base per filtrare progetti
@@ -66,7 +66,7 @@ def get_top_sectors(filters):
 
     result = {}
     for i, x in enumerate(fundings, start=1):
-        result[f"Sector{i}"] = {
+        result[f"sector{i}"] = {
             "name": x["project__cup_descr_sector"],
             "total_financing": x["total"] or 0
         }
@@ -74,7 +74,8 @@ def get_top_sectors(filters):
     return result
 
 
-# ------------------------------
+#
+#  ------------------------------
 # Numero di progetti grandi (>50M)
 # ------------------------------
 def count_big_projects(filters):
@@ -88,7 +89,7 @@ def count_big_projects(filters):
 # Finanziamenti per macroarea
 # ------------------------------
 def funding_by_macroarea(filters):
-    projects_qs = get_filtered_projects(filters)
+    projects_qs = Project.objects.all() #no filter because we want see only middle north and midday
     fundings = Funding.objects.filter(project__in=projects_qs).distinct()
 
     result = fundings.values("project__locations__macroarea").annotate(
@@ -99,7 +100,6 @@ def funding_by_macroarea(filters):
         item["project__locations__macroarea"]: item["total"] or 0
         for item in result
     }
-
 
 # ------------------------------
 # Conteggio progetti per stato

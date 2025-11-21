@@ -86,41 +86,41 @@ function transformAPIData(apiData) {
         progettiCostosi: {
             // Il Serializer restituisce oggetti { title: "...", total_financing: ... }, non array [0], [1]
             labels: [
-                getProj('Project1').title || "Progetto 1",
-                getProj('Project2').title || "Progetto 2",
-                getProj('Project3').title || "Progetto 3",
-                getProj('Project4').title || "Progetto 4",
-                getProj('Project5').title || "Progetto 5",
-                getProj('Project6').title || "Progetto 6",
-                getProj('Project7').title || "Progetto 7",
-                getProj('Project8').title || "Progetto 8",
-                getProj('Project9').title || "Progetto 9",
-                getProj('Project10').title || "Progetto 10"
+                getProj('project1').title || "Progetto 1",
+                getProj('project2').title || "Progetto 2",
+                getProj('project3').title || "Progetto 3",
+                getProj('project4').title || "Progetto 4",
+                getProj('project5').title || "Progetto 5",
+                getProj('project6').title || "Progetto 6",
+                getProj('project7').title || "Progetto 7",
+                getProj('project8').title || "Progetto 8",
+                getProj('project9').title || "Progetto 9",
+                getProj('project10').title || "Progetto 10"
             ],
             data: [
-                getProj('Project1').total_financing || 0,
-                getProj('Project2').total_financing || 0,
-                getProj('Project3').total_financing || 0,
-                getProj('Project4').total_financing || 0,
-                getProj('Project5').total_financing || 0,
-                getProj('Project6').total_financing || 0,
-                getProj('Project7').total_financing || 0,
-                getProj('Project8').total_financing || 0,
-                getProj('Project9').total_financing || 0,
-                getProj('Project10').total_financing || 0
+                getProj('project1').total_financing || 0,
+                getProj('project2').total_financing || 0,
+                getProj('project3').total_financing || 0,
+                getProj('project4').total_financing || 0,
+                getProj('project5').total_financing || 0,
+                getProj('project6').total_financing || 0,
+                getProj('project7').total_financing || 0,
+                getProj('project8').total_financing || 0,
+                getProj('project9').total_financing || 0,
+                getProj('project10').total_financing || 0
             ]
         },
         settori: {
             // Il Serializer restituisce oggetti { name: "...", total_financing: ... }
             labels: [
-                getSect('Sector1').name || "Settore 1",
-                getSect('Sector2').name || "Settore 2",
-                getSect('Sector3').name || "Settore 3"
+                getSect('sector1').name || "Settore 1",
+                getSect('sector2').name || "Settore 2",
+                getSect('sector3').name || "Settore 3"
             ],
             data: [
-                getSect('Sector1').total_financing || 0,
-                getSect('Sector2').total_financing || 0,
-                getSect('Sector3').total_financing || 0
+                getSect('sector1').total_financing || 0,
+                getSect('sector2').total_financing || 0,
+                getSect('sector3').total_financing || 0
             ]
         },
         grandiProgetti: {

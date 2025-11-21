@@ -36,7 +36,6 @@ class OverviewSerializer(serializers.Serializer):
     middle_north_financing = serializers.FloatField()
     national_financing = serializers.FloatField()
     abroad_financing = serializers.FloatField()
-    trasversal_financing = serializers.FloatField()
     top_projects = TopProjectsSerializer()
     number_big_projects = serializers.IntegerField()
     top_sectors = TopSectorsSerializer()
