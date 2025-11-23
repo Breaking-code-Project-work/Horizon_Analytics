@@ -97,7 +97,7 @@ async function fetchAnalisiFinanziariaData(macroArea = 'nessun filtro', fundingS
         if (fundingSource !== 'nessun filtro') params.append('funding_source', fundingSource);
         
         const queryString = params.toString();
-        const url = queryString ? `/api/analisi-finanziaria/?${queryString}` : '/api/analisi-finanziaria/';
+        const url = queryString ? `/api/analysis/?${queryString}` : '/api/analysis/';
 
         console.log('Tentativo di fetch da:', url);
 
@@ -756,3 +756,4 @@ document.addEventListener('DOMContentLoaded', async function() {
     `;
     document.head.appendChild(style);
 });
+
