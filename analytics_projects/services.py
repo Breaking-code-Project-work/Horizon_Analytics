@@ -1,6 +1,6 @@
 import os
 import django
-from django.db.models import Sum
+from django.db.models import Sum, Q, F
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'horizon_analytics.settings')
 django.setup()
@@ -141,3 +141,81 @@ def sum_funding_gross(filters):
 
     result = fundings.aggregate(total_gross=Sum('total_funds_gross'))
     return result['total_gross'] or 0
+
+
+# ------------------------------
+# Restituisce un queryset di Funding filtrato secondo i filtri del contratto:
+#     - macroarea: Centro-Nord, Mezzogiorno, etc.
+#     - funding_source: UE, Stato, Regioni, Privato, Comune, Provincia, Altro_Pubblico
+#     Non filtra progetti a caso, serve solo a limitare i fundings considerati per le aggregazioni.
+# ------------------------------
+def apply_filters(filters):
+    macroarea = filters.get("macroarea")
+    funding_source = filters.get("funding_source")
+
+    # Partiamo da tutti i progetti
+    projects_qs = Project.objects.all()
+
+    # Filtro per macroarea (solo se specificato)
+    if macroarea and macroarea != "Tutte":
+        projects_qs = projects_qs.filter(locations__macroarea=macroarea)
+
+    # Tutti i fundings relativi ai progetti filtrati
+    funding_qs = Funding.objects.filter(project__in=projects_qs)
+
+    # Filtro per funding_source (solo se specificato e diverso da "Tutte")
+    if funding_source and funding_source != "Tutte":
+        if funding_source == "UE":
+            funding_qs = funding_qs.filter(
+                Q(eu_funds__gt=0) |
+                Q(eu_funds_fesr__gt=0) |
+                Q(eu_funds_fse__gt=0) |
+                Q(eu_funds_feasr__gt=0) |
+                Q(eu_funds_feamp__gt=0) |
+                Q(eu_funds_iog__gt=0)
+            )
+        elif funding_source == "Stato":
+            funding_qs = funding_qs.filter(
+                Q(state_rotating_fund__gt=0) |
+                Q(state_fsc__gt=0) |
+                Q(state_pac__gt=0) |
+                Q(state_completions__gt=0) |
+                Q(state_other_measures__gt=0)
+            )
+        elif funding_source == "Regioni":
+            funding_qs = funding_qs.filter(regional_funds__gt=0)
+        elif funding_source == "Privato":
+            funding_qs = funding_qs.filter(private_funds__gt=0)
+        elif funding_source == "Comune":
+            funding_qs = funding_qs.filter(municipal_funds__gt=0)
+        elif funding_source == "Provincia":
+            funding_qs = funding_qs.filter(provincial_funds__gt=0)
+        elif funding_source == "Altro_Pubblico":
+            funding_qs = funding_qs.filter(other_public_funds__gt=0)
+
+    return funding_qs
+
+
+# ------------------------------
+# Somma totale delle fonti di finanziamento
+# ------------------------------
+def funding_sources_analysis(filters):
+    projects, funding = apply_filters(filters)
+
+    data = funding.aggregate(
+        UE=Sum("eu_funds"),
+        Stato=Sum(
+            F("state_rotating_fund") +
+            F("state_fsc") +
+            F("state_pac") +
+            F("state_completions") +
+            F("state_other_measures")
+        ),
+        Regioni=Sum("regional_funds"),
+        Privato=Sum("private_funds"),
+        Comune=Sum("municipal_funds"),
+        Altro_Pubblico=Sum("other_public_funds"),
+        Provincia=Sum("provincial_funds"),
+    )
+
+    return {k: float(v or 0) for k, v in data.items()}
