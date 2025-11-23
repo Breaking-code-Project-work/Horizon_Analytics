@@ -1,6 +1,5 @@
 import os
 import django
-from django.db.models import Sum
 from django.db.models import Prefetch
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'horizon_analytics.settings')
 django.setup()
@@ -45,7 +44,6 @@ def get_filtered_projects_analysis(filters):
         projects_qs = projects_qs.prefetch_related("funding")
 
     return projects_qs.distinct()
-from django.db.models import Sum, Count
 
 def get_funds_to_be_found(filters):
     """
