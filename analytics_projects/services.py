@@ -219,3 +219,57 @@ def funding_sources_analysis(filters):
     )
 
     return {k: float(v or 0) for k, v in data.items()}
+
+
+# ------------------------------
+# Somma totale delle fonti di finanziamento SPECIFICHE
+# ------------------------------
+def specific_funds_contribution(filters):
+    projects, funding = apply_filters(filters)
+
+    data = funding.aggregate(
+        fesr=Sum("eu_funds_fesr"),
+        fse=Sum("eu_funds_fse"),
+        feasr=Sum("eu_funds_feasr"),
+        feamp=Sum("eu_funds_feamp"),
+        iog=Sum("eu_funds_iog"),
+        fsc=Sum("state_fsc"),
+        rot=Sum("state_rotating_fund"),
+        pac=Sum("state_pac"),
+        comp=Sum("state_completions"),
+        altri_stato=Sum("state_other_measures"),
+    )
+
+    return {
+        "FESR (UE)": float(data["fesr"] or 0),
+        "FSE (UE)": float(data["fse"] or 0),
+        "FSC (Stato)": float(data["fsc"] or 0),
+        "Fondo_di_Rotazione (Stato)": float(data["rot"] or 0),
+        "FEASR (UE)": float(data["feasr"] or 0),
+        "FEAMP (UE)": float(data["feamp"] or 0),
+        "IOG (UE)": float(data["iog"] or 0),
+        "PAC (Stato)": float(data["pac"] or 0),
+        "Completamenti (Stato)": float(data["comp"] or 0),
+        "Altri_Stato": float(data["altri_stato"] or 0),
+    }
+
+
+# ------------------------------
+# Top 10 tematiche con il maggior valore di finanziamento
+# ------------------------------
+def top10_thematic_objectives(filters):
+    projects, funding = apply_filters(filters)
+
+    themes = (
+        projects.values("oc_synthetic_theme")
+        .annotate(amount=Sum("funding__total_funds_gross"))
+        .order_by("-amount")[:10]
+    )
+
+    return [
+        {
+            "description": t["oc_synthetic_theme"] or "Non specificato",
+            "amount": float(t["amount"] or 0)
+        }
+        for t in themes
+    ]
