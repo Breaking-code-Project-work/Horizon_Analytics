@@ -12,14 +12,18 @@ class ProjectSerializer(serializers.Serializer):
     macroarea = serializers.CharField()
 
 class TopProjectsSerializer(serializers.DictField):
-    child = ProjectSerializer()
+    def __init__(self, *args, **kwargs):
+        kwargs['child'] = ProjectSerializer()
+        super().__init__(*args, **kwargs)
 
 class SectorSerializer(serializers.Serializer):
     name = serializers.CharField()
     total_financing = serializers.FloatField()
 
 class TopSectorsSerializer(serializers.DictField):
-    child = SectorSerializer()
+    def __init__(self, *args, **kwargs):
+        kwargs['child'] = SectorSerializer()
+        super().__init__(*args, **kwargs)
 
 class OverviewSerializer(serializers.Serializer):
     filters = FiltersOverviewSerializer()
@@ -32,7 +36,6 @@ class OverviewSerializer(serializers.Serializer):
     middle_north_financing = serializers.FloatField()
     national_financing = serializers.FloatField()
     abroad_financing = serializers.FloatField()
-    trasversal_financing = serializers.FloatField()
     top_projects = TopProjectsSerializer()
     number_big_projects = serializers.IntegerField()
     top_sectors = TopSectorsSerializer()
