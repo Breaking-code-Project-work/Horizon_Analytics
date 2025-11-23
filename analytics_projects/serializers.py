@@ -81,23 +81,13 @@ class Top10ThematicObjectivesSerializer(serializers.ListField):
         super().__init__(*args, **kwargs)
 
 class ProjectTypologySerializer(serializers.Serializer):
-    nature = serializers.CharField()
+    type = serializers.CharField()
     amount = serializers.FloatField()
 
 class Top10ProjectTypologiesSerializer(serializers.ListField):
     def __init__(self, *args, **kwargs):
         kwargs["child"] = ProjectTypologySerializer()
         super().__init__(*args, **kwargs)
-
-class InfrastructuralSubsectorSerializer(serializers.Serializer):
-    subsector = serializers.CharField()
-    amount = serializers.FloatField()
-
-class Top5InfrastructuralSubsectorsSerializer(serializers.ListField):
-    def __init__(self, *args, **kwargs):
-        kwargs["child"] = InfrastructuralSubsectorSerializer()
-        super().__init__(*args, **kwargs)
-
 
 class FundsToBeFoundSerializer(serializers.Serializer):
     number_of_projects_with_gap = serializers.IntegerField()
@@ -118,7 +108,6 @@ class AnalysisSerializer(serializers.Serializer):
     specific_funds_contribution = SpecificFundsContributionSerializer()
     top10_thematic_objectives = Top10ThematicObjectivesSerializer()
     top10_project_typologies = Top10ProjectTypologiesSerializer()
-    top5_infrastructural_subsectors = Top5InfrastructuralSubsectorsSerializer()
     funds_to_be_found = FundsToBeFoundSerializer()
     payments_realization_gap = PaymentsRealizationGapSerializer()
 

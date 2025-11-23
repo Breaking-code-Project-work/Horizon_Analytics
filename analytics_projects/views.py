@@ -72,7 +72,6 @@ class AnalysisAPI(APIView):
                 "specific_funds_contribution": get_specific_funds_contribution(filters),
                 "top10_thematic_objectives": get_top10_thematic_objectives(filters),
                 "top10_project_typologies": get_top10_project_typologies(filters),
-                "top5_infrastructural_subsectors": get_top5_infrastructural_subsectors(filters),
                 "funds_to_be_found": get_funds_to_be_found(filters),
                 "payments_realization_gap": get_payments_realization_gap(filters),
             }
