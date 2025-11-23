@@ -3,7 +3,7 @@ from .models import Project, Location, Funding
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('local_project_code', 'oc_project_title', 'oc_project_status')
+    list_display = ('local_project_code', 'oc_project_title', 'oc_project_status', 'cup_typology')
     search_fields = ('local_project_code', 'oc_project_title')
 
 @admin.register(Location)

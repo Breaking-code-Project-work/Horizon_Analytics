@@ -33,6 +33,11 @@ def clean_str(value):
     """Rimuove spazi iniziali/finali da stringhe."""
     return value.strip() if isinstance(value, str) else value
 
+def map_cup_typology(value: str):
+    if not value:
+        return None
+    return next((c.value for c in Project.CUPTypologyChoices if c.value == value.strip()), None)
+
 # CSV reading
 def import_projects_from_csv(file_path: str):
     """Legge un file CSV e restituisce una lista di dizionari con i dati."""
@@ -101,6 +106,7 @@ def load_projects_into_db(projects_data):
                 "oc_procedural_state": data.get("OC_STATO_PROCEDURALE") or "Non avviato",
                 "oc_project_title": data.get("OC_TITOLO_PROGETTO", "Titolo non disponibile"),
                 "cup_descr_sector": data.get("CUP_DESCR_SETTORE"),
+                "cup_typology": map_cup_typology(data.get("CUP_DESCR_TIPOLOGIA")),
                 "oc_synthetic_theme": data.get("OC_TEMA_SINTETICO"),
             },
         )

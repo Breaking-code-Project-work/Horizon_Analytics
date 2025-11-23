@@ -19,6 +19,45 @@ class Project(models.Model):
         IN_EXECUTION = 'In esecuzione', 'In esecuzione'
         EXECUTED = 'Eseguito', 'Eseguito'
 
+    # Enum for CUP typology
+    class CUPTypologyChoices(models.TextChoices):
+        PURCHASE_FIXED_ASSETS = 'ACQUISTO DI IMMOBILIZZAZIONI', 'Acquisto di immobilizzazioni'
+        PURCHASE_REAL_SERVICES = 'ACQUISTO SERVIZI REALI (INCLUDE FORMAZIONE)', 'Acquisto servizi reali (include formazione)'
+        PURCHASE_REAL_SERVICES2 = 'ACQUISTO SERVIZI REALI (INCLUSA FORMAZIONE)', 'Acquisto servizi reali (inclusa formazione)'
+        OTHER = 'ALTRO', 'Altro'
+        MODERNIZATION = 'AMMODERNAMENTO', 'Ammodernamento'
+        TECHNOLOGICAL_LABORATORY_MODERNIZATION = 'AMMODERNAMENTO TECNOLOGICO E LABORATORIALE', 'Ammodernamento tecnologico e laboratoriale'
+        EXPANSION = 'AMPLIAMENTO', 'Ampliamento'
+        WEB_APPS_PLATFORMS = 'APPLICATIVI E PIATTAFORME WEB', 'Applicativi e piattaforme web'
+        ASSISTANCE = 'ASSISTENZA', 'Assistenza'
+        RESEARCH_ACTIVITY = "ATTIVITA' DI RICERCA", "Attività di ricerca"
+        CONSULTANCY = 'CONSULENZE', 'Consulenze'
+        TRAINING_COURSES = 'CORSI DI FORMAZIONE', 'Corsi di formazione'
+        FUND_ESTABLISHMENT = 'COSTITUZIONE O INCREMENTO DI FONDO PER PRESTITO', 'Costituzione o incremento di fondo per prestito'
+        WORK_INCENTIVES = 'INCENTIVI AL LAVORO', 'Incentivi al lavoro'
+        SOCIAL_WORKS = 'LAVORI SOCIALMENTE UTILI', 'Lavori socialmente utili'
+        ORDINARY_MAINTENANCE = 'MANUTENZIONE ORDINARIA', 'Manutenzione ordinaria'
+        EXTRAORDINARY_MAINTENANCE = 'MANUTENZIONE STRAORDINARIA', 'Manutenzione straordinaria'
+        EXTRAORDINARY_MAINTENANCE_ENERGY = 'MANUTENZIONE STRAORDINARIA CON EFFICIENTAMENTO ENERGETICO', 'Manutenzione straordinaria con efficientamento energetico'
+        EXTRAORDINARY_MAINTENANCE_ANTIFIRE = 'MANUTENZIONE STRAORDINARIA DI ADEGUAMENTO IMPIANTISTICA E O ANTINCENDIO', 'Manutenzione straordinaria adeguamento impiantistica e/o antincendio'
+        EXTRAORDINARY_MAINTENANCE_SEISMIC = 'MANUTENZIONE STRAORDINARIA DI ADEGUAMENTO SISMICO', 'Manutenzione straordinaria adeguamento sismico'
+        EXTRAORDINARY_MAINTENANCE_SEISMIC_IMPROV = 'MANUTENZIONE STRAORDINARIA DI MIGLIORAMENTO SISMICO', 'Manutenzione straordinaria miglioramento sismico'
+        EXTRAORDINARY_MAINTENANCE_ACCESSIBILITY = "MANUTENZIONE STRAORDINARIA PER ACCESSIBILITA' E ABBATTIMENTO DELLE BARRIERE ARCHITETTONICHE", "Manutenzione straordinaria per accessibilità e abbattimento delle barriere architettoniche"
+        EXTRAORDINARY_MAINTENANCE_SAFETY = 'MANUTENZIONE STRAORDINARIA PER MESSA IN SICUREZZA (ESCLUSO DISSESTO IDROGEOLOGICO)', 'Manutenzione straordinaria per messa in sicurezza (escluso dissesto idrogeologico)'
+        NEW_SUPPLY = 'NUOVA FORNITURA', 'Nuova fornitura'
+        NEW_REALIZATION = 'NUOVA REALIZZAZIONE', 'Nuova realizzazione'
+        NEW_REALIZATION_ENERGY = 'NUOVA REALIZZAZIONE CON EFFICIENTAMENTO ENERGETICO', 'Nuova realizzazione con efficientamento energetico'
+        RESEARCH_PROJECTS = 'PROGETTI DI RICERCA', 'Progetti di ricerca'
+        RECOVERY = 'RECUPERO', 'Recupero'
+        RESTORATION = 'RESTAURO', 'Restauro'
+        RECONVERSION = 'RICONVERSIONE', 'Riconversione'
+        RESTRUCTURING = "RISTRUTTURAZIONE (PER CAMBIO DI DESTINAZIONE D'USO)", "Ristrutturazione (per cambio di destinazione d'uso)"
+        RESTRUCTURING_ENERGY = 'RISTRUTTURAZIONE CON EFFICIENTAMENTO ENERGETICO', 'Ristrutturazione con efficientamento energetico'
+        INCOME_SUPPORT = 'SOSTEGNO AL REDDITO CON RISORSE FSC E/O SIE', 'Sostegno al reddito con risorse FSC e/o SIE'
+        STUDIES_DESIGNS = 'STUDI E PROGETTAZIONI', 'Studi e progettazioni'
+        STUDIES_TERRITORIAL_PLANNING = 'STUDI E PROGETTAZIONI O PIANIFICAZIONE TERRITORIALE', 'Studi e progettazioni o pianificazione territoriale'
+        STUDIES_DESIGNS_ENERGY = 'STUDI E PROGETTAZIONI PER EFFICIENTAMENTO ENERGETICO', 'Studi e progettazioni per efficientamento energetico'
+        TRANSFER = 'TRASFERIMENTO', 'Trasferimento'
 
     # Attributes
     local_project_code = models.CharField(max_length=100, primary_key=True)  # COD_LOCALE_PROGETTO
@@ -32,10 +71,15 @@ class Project(models.Model):
         choices=ProceduralStatusChoices.choices,
         default=ProceduralStatusChoices.NOT_STARTED
     )  # OC_STATO_PROCEDURALE
+    cup_typology = models.CharField(
+        max_length=255,
+        choices=CUPTypologyChoices.choices,
+        blank=True,
+        null=True
+    )  # CUP_DESCR_TIPOLOGIA
     oc_project_title = models.TextField()  # OC_TITOLO_PROGETTO
     cup_descr_sector = models.CharField(max_length=255, blank=True, null=True)  # CUP_DESCR_SETTORE
     oc_synthetic_theme = models.CharField(max_length=255, blank=True, null=True)  # OC_TEMA_SINTETICO
-
 
 class Funding(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="funding")
