@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from serializers import OverviewSerializer, AnalysisSerializer
-from services import *
+from .serializers import OverviewSerializer, AnalysisSerializer
+from .services import *
 
 def dashboard(request):
         return render(request, 'analytics_projects/dashboard.html')
