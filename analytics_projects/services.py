@@ -326,3 +326,26 @@ def get_funds_to_be_found(filters):
         "number_of_projects_with_gap": number_of_projects_with_gap,
         "total_missing_amount": total_missing_amount
     }
+
+def get_payments_realization_gap(filters):
+    """
+    give a dictionary with total realized cost, total payment and difference between them
+    """
+    # no filters
+    projects = Project.objects.all()
+
+    # Aggrega i valori dei finanziamenti dei progetti filtrati
+    aggregation = Funding.objects.filter(project__in=projects).aggregate(
+        total_realized_cost=Sum('total_funds_gross'),
+        total_payments_made=Sum('total_funds_net'),
+    )
+
+    total_realized_cost = aggregation['total_realized_cost'] or 0
+    total_payments_made = aggregation['total_payments_made'] or 0
+    overall_difference = total_realized_cost - total_payments_made
+
+    return {
+        "total_realized_cost": total_realized_cost,
+        "total_payments_made": total_payments_made,
+        "overall_difference": overall_difference
+    }
