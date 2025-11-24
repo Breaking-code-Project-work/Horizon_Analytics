@@ -141,3 +141,20 @@ def sum_funding_gross(filters):
 
     result = fundings.aggregate(total_gross=Sum('total_funds_gross'))
     return result['total_gross'] or 0
+
+def get_top_project_typologies(filters):
+    projects_qs = get_filtered_projects(filters)
+
+    fundings = Funding.objects.filter(project__in=projects_qs) \
+        .values("project__cup_typology") \
+        .annotate(total=Sum("total_funds_gross")) \
+        .order_by("-total")[:10]
+
+    result = []
+    for x in fundings:
+        result.append({
+            "typology": x["project__cup_typology"],
+            "amount": x["total"] or 0
+        })
+
+    return result

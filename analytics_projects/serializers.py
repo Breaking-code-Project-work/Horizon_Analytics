@@ -25,6 +25,9 @@ class TopSectorsSerializer(serializers.DictField):
         kwargs['child'] = SectorSerializer()
         super().__init__(*args, **kwargs)
 
+class ProjectTypologySerializer(serializers.Serializer):
+    typology = serializers.CharField()
+    amount = serializers.FloatField()
 class OverviewSerializer(serializers.Serializer):
     filters = FiltersOverviewSerializer()
     number_of_projects = serializers.IntegerField()
@@ -39,3 +42,6 @@ class OverviewSerializer(serializers.Serializer):
     top_projects = TopProjectsSerializer()
     number_big_projects = serializers.IntegerField()
     top_sectors = TopSectorsSerializer()
+    top_project_typologies = ProjectTypologySerializer(many=True)
+
+
