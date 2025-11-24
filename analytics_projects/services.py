@@ -142,8 +142,8 @@ def sum_funding_gross(filters):
     result = fundings.aggregate(total_gross=Sum('total_funds_gross'))
     return result['total_gross'] or 0
 
-def get_top_project_typologies(filters):
-    projects_qs = get_filtered_projects(filters)
+def get_top_project_typologies():
+    projects_qs = get_filtered_projects(filters={})
 
     fundings = Funding.objects.filter(project__in=projects_qs) \
         .values("project__cup_typology") \

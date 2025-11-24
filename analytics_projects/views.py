@@ -78,7 +78,7 @@ class OverviewAPI(APIView):
         serializer = OverviewSerializer(data)
         return Response({"data": serializer.data}, status=status.HTTP_200_OK)
 
-class OverviewFinancingAPI(APIView):
-    data = {
-        "top_project_typologies": get_top_project_typologies(filters)
-    }
+#class OverviewFinancingAPI(APIView):
+#    data = {
+#        "top_project_typologies": get_top_project_typologies(filters)
+#    }
