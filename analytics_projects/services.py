@@ -142,7 +142,6 @@ def sum_funding_gross(filters):
     result = fundings.aggregate(total_gross=Sum('total_funds_gross'))
     return result['total_gross'] or 0
 
-
 # ------------------------------
 # Restituisce un queryset di Funding filtrato secondo i filtri del contratto:
 #     - macroarea: Centro-Nord, Mezzogiorno, etc.
@@ -150,20 +149,17 @@ def sum_funding_gross(filters):
 #     Non filtra progetti a caso, serve solo a limitare i fundings considerati per le aggregazioni.
 # ------------------------------
 def apply_filters(filters):
+    projects_qs = Project.objects.prefetch_related("funding", "locations")
+
     macroarea = filters.get("macroarea")
     funding_source = filters.get("funding_source")
 
-    # Partiamo da tutti i progetti
-    projects_qs = Project.objects.all()
-
-    # Filtro per macroarea (solo se specificato)
     if macroarea and macroarea != "Tutte":
         projects_qs = projects_qs.filter(locations__macroarea=macroarea)
 
-    # Tutti i fundings relativi ai progetti filtrati
+    # Filtraggio per funding_source se necessario
     funding_qs = Funding.objects.filter(project__in=projects_qs)
 
-    # Filtro per funding_source (solo se specificato e diverso da "Tutte")
     if funding_source and funding_source != "Tutte":
         if funding_source == "UE":
             funding_qs = funding_qs.filter(
@@ -193,7 +189,9 @@ def apply_filters(filters):
         elif funding_source == "Altro_Pubblico":
             funding_qs = funding_qs.filter(other_public_funds__gt=0)
 
-    return funding_qs
+    return projects_qs.distinct(), funding_qs.distinct()
+
+
 
 
 # ------------------------------
