@@ -351,6 +351,7 @@ def get_payments_realization_gap(filters):
         "total_payments_made": total_payments_made,
         "overall_difference": overall_difference
     }
+
 def get_top_project_typologies():
     projects_qs = get_filtered_projects(filters={})
 
