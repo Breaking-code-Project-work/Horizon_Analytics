@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import OverviewAPI
 from django.contrib import admin
 from . import views
+from .views import OverviewAPI, AnalysisAPI
 
 urlpatterns = [
     path('api/overview/', OverviewAPI.as_view(), name='overview-api'), #url of API
@@ -14,4 +14,5 @@ urlpatterns = [
     path('beneficiari_page/', views.beneficiari_page, name='beneficiari_page'), #url of beneficiari page
     path('efficienza_e_performance_page/', views.efficienza_e_performance_page, name='efficienza_e_performance_page'), #url of efficenza e performance page
     path('territori_e_attori_page/', views.territori_e_attori_page, name='territori_e_attori_page'), #url of territori e attori page
+    path('api/analysis/', AnalysisAPI.as_view(), name='analysis-api'), #url of API
 ]

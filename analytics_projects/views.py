@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import OverviewSerializer
-from .services import *
+from serializers import OverviewSerializer, AnalysisSerializer
+from services import *
 
 def dashboard(request):
         return render(request, 'analytics_projects/dashboard.html')
@@ -78,7 +78,37 @@ class OverviewAPI(APIView):
         serializer = OverviewSerializer(data)
         return Response({"data": serializer.data}, status=status.HTTP_200_OK)
 
-#class OverviewFinancingAPI(APIView):
-#    data = {
-#        "top_project_typologies": get_top_project_typologies(filters)
-#    }
+class AnalysisAPI(APIView):
+    """
+    API that receives filters from frontend and returns
+    the JSON structure of the Contract API.
+    """
+
+    def get(self, request):
+        # Recover filters from query parameters
+        macroarea = request.query_params.get("macroarea")
+        funding_source = request.query_params.get("funding_source")
+
+        filters = {
+            "macroarea": macroarea,
+            "funding_source": funding_source
+        }
+
+        data = {
+            "filters": {
+                "macroarea": macroarea,
+                "funding_source": funding_source
+            },
+            "data": {
+                "funding_sources_analysis": get_funding_sources_analysis(filters),
+                "specific_funds_contribution": get_specific_funds_contribution(filters),
+                "top10_thematic_objectives": get_top10_thematic_objectives(filters),
+                "top10_project_typologies": get_top10_project_typologies(filters),
+                "funds_to_be_found": get_funds_to_be_found(filters),
+                "payments_realization_gap": get_payments_realization_gap(filters),
+            }
+        }
+        # Pass the already-prepared dictionary directly to the serializer
+        serializer = AnalysisSerializer(data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
