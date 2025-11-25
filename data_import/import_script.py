@@ -1,6 +1,8 @@
+import sys
 import os
 
-# Setup Django 
+# Setup Django
+sys.path.append('/app')
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "horizon_analytics.settings")
 import django
 django.setup()
@@ -97,8 +99,45 @@ def normalize_projects_data(projects_data):
 # Import on database 
 @transaction.atomic
 def load_projects_into_db(projects_data):
+    # Prima assicurati che tutte le locations siano caricate
+    locations_data = [
+        {"region_code": "001", "region_name": "PIEMONTE", "macroarea": "Centro-Nord"},
+        {"region_code": "002", "region_name": "VALLE D'AOSTA", "macroarea": "Centro-Nord"},
+        {"region_code": "003", "region_name": "LOMBARDIA", "macroarea": "Centro-Nord"},
+        {"region_code": "004", "region_name": "TRENTINO-ALTO ADIGE", "macroarea": "Centro-Nord"},
+        {"region_code": "005", "region_name": "VENETO", "macroarea": "Centro-Nord"},
+        {"region_code": "006", "region_name": "FRIULI-VENEZIA GIULIA", "macroarea": "Centro-Nord"},
+        {"region_code": "007", "region_name": "LIGURIA", "macroarea": "Centro-Nord"},
+        {"region_code": "008", "region_name": "EMILIA-ROMAGNA", "macroarea": "Centro-Nord"},
+        {"region_code": "009", "region_name": "TOSCANA", "macroarea": "Centro-Nord"},
+        {"region_code": "010", "region_name": "UMBRIA", "macroarea": "Centro-Nord"},
+        {"region_code": "011", "region_name": "MARCHE", "macroarea": "Centro-Nord"},
+        {"region_code": "012", "region_name": "LAZIO", "macroarea": "Centro-Nord"},
+        {"region_code": "013", "region_name": "ABRUZZO", "macroarea": "Mezzogiorno"},
+        {"region_code": "014", "region_name": "MOLISE", "macroarea": "Mezzogiorno"},
+        {"region_code": "015", "region_name": "CAMPANIA", "macroarea": "Mezzogiorno"},
+        {"region_code": "016", "region_name": "PUGLIA", "macroarea": "Mezzogiorno"},
+        {"region_code": "017", "region_name": "BASILICATA", "macroarea": "Mezzogiorno"},
+        {"region_code": "018", "region_name": "CALABRIA", "macroarea": "Mezzogiorno"},
+        {"region_code": "019", "region_name": "SICILIA", "macroarea": "Mezzogiorno"},
+        {"region_code": "020", "region_name": "SARDEGNA", "macroarea": "Mezzogiorno"},
+        {"region_code": "997", "region_name": "PAESI EUROPEI", "macroarea": "Estero"},
+        {"region_code": "000", "region_name": "AMBITO NAZIONALE", "macroarea": "Ambito Nazionale"},
+    ]
+
+    for loc in locations_data:
+        Location.objects.update_or_create(
+            region_code=loc["region_code"],
+            defaults={
+                "region_name": loc["region_name"],
+                "macroarea": loc["macroarea"],
+            }
+        )
+
+    logger.info("Locations caricate correttamente!")
+
+    # Poi processa i progetti
     for data in projects_data:
-        # PROJECT 
         project, _ = Project.objects.update_or_create(
             local_project_code=data["COD_LOCALE_PROGETTO"],
             defaults={
@@ -112,7 +151,7 @@ def load_projects_into_db(projects_data):
             },
         )
 
-        # FUNDING
+        # Funding
         Funding.objects.update_or_create(
             project=project,
             defaults={
@@ -141,54 +180,20 @@ def load_projects_into_db(projects_data):
                 "total_funds_net": safe_float(data.get("OC_FINANZ_TOT_PUB_NETTO")),
             },
         )
-    # LOCATION
-    locations = [
-        {"region_code": "001", "region_name": "PIEMONTE", "macroarea": "Centro-Nord"},
-        {"region_code": "002", "region_name": "VALLE D'AOSTA", "macroarea": "Centro-Nord"},
-        {"region_code": "003", "region_name": "LOMBARDIA", "macroarea": "Centro-Nord"},
-        {"region_code": "004", "region_name": "TRENTINO-ALTO ADIGE", "macroarea": "Centro-Nord"},
-        {"region_code": "005", "region_name": "VENETO", "macroarea": "Centro-Nord"},
-        {"region_code": "006", "region_name": "FRIULI-VENEZIA GIULIA", "macroarea": "Centro-Nord"},
-        {"region_code": "007", "region_name": "LIGURIA", "macroarea": "Centro-Nord"},
-        {"region_code": "008", "region_name": "EMILIA-ROMAGNA", "macroarea": "Centro-Nord"},
-        {"region_code": "009", "region_name": "TOSCANA", "macroarea": "Centro-Nord"},
-        {"region_code": "010", "region_name": "UMBRIA", "macroarea": "Centro-Nord"},
-        {"region_code": "011", "region_name": "MARCHE", "macroarea": "Centro-Nord"},
-        {"region_code": "012", "region_name": "LAZIO", "macroarea": "Centro-Nord"},
-        {"region_code": "013", "region_name": "ABRUZZO", "macroarea": "Mezzogiorno"},
-        {"region_code": "014", "region_name": "MOLISE", "macroarea": "Mezzogiorno"},
-        {"region_code": "015", "region_name": "CAMPANIA", "macroarea": "Mezzogiorno"},
-        {"region_code": "016", "region_name": "PUGLIA", "macroarea": "Mezzogiorno"},
-        {"region_code": "017", "region_name": "BASILICATA", "macroarea": "Mezzogiorno"},
-        {"region_code": "018", "region_name": "CALABRIA", "macroarea": "Mezzogiorno"},
-        {"region_code": "019", "region_name": "SICILIA", "macroarea": "Mezzogiorno"},
-        {"region_code": "020", "region_name": "SARDEGNA", "macroarea": "Mezzogiorno"},
-        {"region_code": "997", "region_name": "PAESI EUROPEI", "macroarea": "Estero"},
-        {"region_code": "000", "region_name": "AMBITO NAZIONALE", "macroarea": "Ambito Nazionale"},
-    ]
 
-    for loc in locations:
-        Location.objects.update_or_create(
-            region_code=loc["region_code"],
-            defaults={
-                "region_name": loc["region_name"],
-                "macroarea": loc["macroarea"],
-            }
-        )
-        
-    print("Locations caricate correttamente!")
+        # Associa le locations corrette al progetto se trasversale
+        region_code = data.get("COD_REGIONE")
+        if region_code:
+            # Possibile che il CSV contenga più codici separati da :::
+            codes = [c.strip() for c in region_code.split(":::")]
+            locs_to_add = Location.objects.filter(region_code__in=codes)
+            if locs_to_add.exists():
+                project.locations.add(*locs_to_add)
+
+    logger.info("Progetti e associazioni locations completate con successo!")
 
 if __name__ == "__main__":
     projects = import_projects_from_csv("csv/Progetti_2021-2027_1.csv")  # percorso relativo del CSV
     #projects = import_multiple_csv("csv") #path folder
     normalized_projects = normalize_projects_data(projects)
-    # 🔍 CHECK CUP TIPOLOGY MANCANTI
-    csv_values = set(d.get("CUP_DESCR_TIPOLOGIA") for d in projects)
-    choices_values = set(c.value for c in Project.CUPTypologyChoices)
-    missing = csv_values - choices_values
-
-    print("\n=== CUP_TYPOLOGY NON RICONOSCIUTI ===")
-    for item in sorted(missing):
-        print(f"- {item}")
-    print("=====================================\n")
     load_projects_into_db(normalized_projects)
