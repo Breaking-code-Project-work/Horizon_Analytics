@@ -316,9 +316,7 @@ def get_funds_to_be_found(filters):
     - numero progetti con savings > 0
     - totale saving
     """
-
     projects = get_filtered_projects_analysis(filters)
-
     # Prefetch funding per evitare N+1 queries
     projects = projects.prefetch_related("funding")
 
@@ -371,7 +369,7 @@ def get_top_project_typologies():
     result = []
     for x in fundings:
         result.append({
-            "type": x["project__cup_typology"],
+            "type": x["project__cup_typology"] or " ",
             "amount": x["total"] or 0
         })
 

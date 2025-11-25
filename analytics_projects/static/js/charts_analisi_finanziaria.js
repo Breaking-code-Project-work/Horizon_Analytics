@@ -29,15 +29,15 @@ const originalMockData = {
             "Provincia": 1
         },
         specific_funds_contribution: {
-            "FESR (UE)": 1,
-            "FSE (UE)": 1,
-            "FSC (Stato)": 1,
-            "Fondo_di_Rotazione (Stato)": 1,
-            "FEASR (UE)": 1,
-            "FEAMP (UE)": 1,
-            "IOG (UE)": 1,
-            "PAC (Stato)": 1,
-            "Completamenti (Stato)": 1,
+            "FESR_UE": 1,
+            "FSE_UE": 1,
+            "FSC_Stato": 1,
+            "Fondo_di_Rotazione_Stato": 1,
+            "FEASR_UE": 1,
+            "FEAMP_UE": 1,
+            "IOG_UE": 1,
+            "PAC_Stato": 1,
+            "Completamenti_Stato": 1,
             "Altri_Stato": 1
         },
         top10_thematic_objectives: [
@@ -53,16 +53,16 @@ const originalMockData = {
             { "description": "Occupazione giovanile", "amount": 1 }
         ],
         top10_project_typologies: [
-            { "nature": "ACQUISTO O REALIZZAZIONE DI SERVIZI", "amount": 1 },
-            { "nature": "LAVORI PUBBLICI", "amount": 1 },
-            { "nature": "CONCESSIONE DI INCENTIVI AD UNITA' PRODUTTIVE", "amount": 1 },
-            { "nature": "ACQUISTO O REALIZZAZIONE DI BENI E ATTREZZATURE", "amount": 1 },
-            { "nature": "CONCESSIONE DI INCENTIVI A ISTITUZIONI", "amount": 1 },
-            { "nature": "ALTRO (NON RICONDUCIBILE)", "amount": 1 },
-            { "nature": "STUDI E PROGETTAZIONI", "amount": 1 },
-            { "nature": "ATTIVITA' PROMOZIONALI E DI SENSIBILIZZAZIONE", "amount": 1 },
-            { "nature": "CONTRIBUTI ECONOMICI AD ENTI PUBBLICI", "amount": 1 },
-            { "nature": "PROGRAMMI DI FORMAZIONE", "amount": 1 }
+            { "type": "ACQUISTO O REALIZZAZIONE DI SERVIZI", "amount": 1 },
+            { "type": "LAVORI PUBBLICI", "amount": 1 },
+            { "type": "CONCESSIONE DI INCENTIVI AD UNITA' PRODUTTIVE", "amount": 1 },
+            { "type": "ACQUISTO O REALIZZAZIONE DI BENI E ATTREZZATURE", "amount": 1 },
+            { "type": "CONCESSIONE DI INCENTIVI A ISTITUZIONI", "amount": 1 },
+            { "type": "ALTRO (NON RICONDUCIBILE)", "amount": 1 },
+            { "type": "STUDI E PROGETTAZIONI", "amount": 1 },
+            { "type": "ATTIVITA' PROMOZIONALI E DI SENSIBILIZZAZIONE", "amount": 1 },
+            { "type": "CONTRIBUTI ECONOMICI AD ENTI PUBBLICI", "amount": 1 },
+            { "type": "PROGRAMMI DI FORMAZIONE", "amount": 1 }
         ],
         top5_infrastructural_subsectors: [
             { "subsector": "OPERE STRADALI", "amount": 1 },
