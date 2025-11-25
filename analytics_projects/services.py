@@ -14,9 +14,10 @@ from analytics_projects.models import Project, Funding, Location
 # Funzione base per filtrare progetti
 # ------------------------------
 def get_filtered_projects(filters):
-    """Restituisce i progetti filtrati per regione e macroarea, con total_financing annotato."""
+    """Restituisce i progetti filtrati per regione, macroarea e is_trasversale, con total_financing annotato."""
     region = filters.get("region")
     macroarea = filters.get("macroarea")
+    is_trasversale = filters.get("is_trasversale")
 
     projects_qs = Project.objects.prefetch_related("locations").annotate(
         total_financing=Sum("funding__total_funds_gross")
@@ -28,7 +29,14 @@ def get_filtered_projects(filters):
     if macroarea and macroarea != "nessun filtro":
         projects_qs = projects_qs.filter(locations__macroarea=macroarea)
 
+    if is_trasversale is not None:
+        if str(is_trasversale).lower() == "true":
+            projects_qs = projects_qs.filter(is_trasversale=True)
+        elif str(is_trasversale).lower() == "false":
+            projects_qs = projects_qs.filter(is_trasversale=False)
+
     return projects_qs.distinct()
+
 
 def get_filtered_projects_analysis(filters):
     """

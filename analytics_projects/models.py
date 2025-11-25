@@ -60,6 +60,7 @@ class Project(models.Model):
         TRANSFER = 'TRASFERIMENTO', 'Trasferimento'
 
     # Attributes
+    is_trasversale = models.BooleanField(default=False)
     local_project_code = models.CharField(max_length=100, primary_key=True)  # COD_LOCALE_PROGETTO
     oc_project_status = models.CharField(
         max_length=100,
@@ -139,7 +140,6 @@ class Location(models.Model):
         MIDDLE_NORTH = 'Centro-Nord', 'Centro-Nord'
         ABROAD = 'Estero', 'Estero'
         MIDDAY = 'Mezzogiorno', 'Mezzogiorno'
-        TRASVERSAL = 'Traversale', 'Trasversale'
     region_code = models.CharField(max_length=20, primary_key = True)
     region_name = models.CharField(max_length=50)
     macroarea = models.CharField(

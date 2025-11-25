@@ -45,9 +45,16 @@ class OverviewAPI(APIView):
         # Recover filters from query string
         region = request.query_params.get("region")
         macroarea = request.query_params.get("macroarea")
+        is_trasversale = None
+
+        if macroarea == "Trasversale":
+            is_trasversale = True
+            macroarea = None
+
         filters = {
             "region": region,
-            "macroarea": macroarea
+            "macroarea": macroarea,
+            "is_trasversale": is_trasversale
         }
 
         num_projects_with_status = count_projects_with_status(filters)

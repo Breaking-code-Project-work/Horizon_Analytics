@@ -3,8 +3,9 @@ from .models import Project, Location, Funding
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('local_project_code', 'oc_project_title', 'oc_project_status', 'cup_typology', 'oc_synthetic_theme')
+    list_display = ('local_project_code', 'oc_project_title', 'oc_project_status', 'cup_typology', 'oc_synthetic_theme', 'is_trasversale')
     search_fields = ('local_project_code', 'oc_project_title')
+    list_filter = ('is_trasversale',)
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):

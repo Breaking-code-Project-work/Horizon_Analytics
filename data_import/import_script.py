@@ -108,6 +108,7 @@ def load_projects_into_db(projects_data):
                 "cup_descr_sector": data.get("CUP_DESCR_SETTORE"),
                 "cup_typology": map_cup_typology(data.get("CUP_DESCR_TIPOLOGIA")),
                 "oc_synthetic_theme": data.get("OC_TEMA_SINTETICO"),
+                "is_trasversale": (data.get("OC_MACROAREA", "").strip().lower() == "trasversale"),
             },
         )
 
