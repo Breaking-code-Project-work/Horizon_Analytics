@@ -283,6 +283,13 @@ h1, h2, h3, h4 {
     grid-column: span 2;
 }
 
+/* Classe per il grafico dei Grandi Progetti */
+.chart-three-quarters {
+    grid-column: span 2;
+    width: 75%;
+    margin: 0 auto;
+}
+
 .chart-title {
     font-size: 1.2rem;
     margin-bottom: 20px;
@@ -320,11 +327,20 @@ canvas {
     .chart-wide {
         grid-column: span 1;
     }
+    
+    .chart-three-quarters {
+        width: 90%;
+        grid-column: span 1;
+    }
 }
 
 @media (max-width: 768px) {
     .charts-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .chart-three-quarters {
+        width: 100%;
     }
 
     .page-title {
@@ -428,5 +444,3 @@ canvas {
         width: 100%;
     }
 }
-
-
