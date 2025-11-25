@@ -369,10 +369,16 @@ def get_payments_realization_gap(filters):
 def get_top_project_typologies():
     projects_qs = get_filtered_projects(filters={})
 
-    fundings = Funding.objects.filter(project__in=projects_qs) \
-        .values("project__cup_typology") \
-        .annotate(total=Sum("total_funds_gross")) \
+    fundings = (
+        Funding.objects
+        .filter(
+            project__in=projects_qs,
+            project__cup_typology__isnull=False
+        )
+        .values("project__cup_typology")
+        .annotate(total=Sum("total_funds_gross"))
         .order_by("-total")[:10]
+    )
 
     result = []
     for x in fundings:

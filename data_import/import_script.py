@@ -181,6 +181,14 @@ def load_projects_into_db(projects_data):
 if __name__ == "__main__":
     projects = import_projects_from_csv("csv/Progetti_2021-2027_1.csv")  # percorso relativo del CSV
     #projects = import_multiple_csv("csv") #path folder
-    print(projects[0].keys())
     normalized_projects = normalize_projects_data(projects)
+    # 🔍 CHECK CUP TIPOLOGY MANCANTI
+    csv_values = set(d.get("CUP_DESCR_TIPOLOGIA") for d in projects)
+    choices_values = set(c.value for c in Project.CUPTypologyChoices)
+    missing = csv_values - choices_values
+
+    print("\n=== CUP_TYPOLOGY NON RICONOSCIUTI ===")
+    for item in sorted(missing):
+        print(f"- {item}")
+    print("=====================================\n")
     load_projects_into_db(normalized_projects)
