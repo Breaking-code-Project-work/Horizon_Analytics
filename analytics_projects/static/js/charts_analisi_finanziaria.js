@@ -13,7 +13,7 @@ let chartInstances = {
     barChartFondi: null,
     horizontalBarObiettivi: null,
     barChartTipologie: null,
-    horizontalBarSottosettori: null,
+    // horizontalBarSottosettori: null,
     barChartCostoPagamenti: null
 };
 
@@ -93,7 +93,7 @@ const originalMockData = {
 async function fetchAnalisiFinanziariaData(macroArea = 'nessun filtro', fundingSource = 'nessun filtro') {
     try {
         const params = new URLSearchParams();
-        if (macroArea !== 'nessun filtro') params.append('macro_area', macroArea);
+        if (macroArea !== 'nessun filtro') params.append('macroarea', macroArea);
         if (fundingSource !== 'nessun filtro') params.append('funding_source', fundingSource);
         
         const queryString = params.toString();
@@ -115,7 +115,7 @@ async function fetchAnalisiFinanziariaData(macroArea = 'nessun filtro', fundingS
         const jsonData = await response.json();
         console.log('Dati ricevuti dall\'API:', jsonData);
         
-        return jsonData.data;
+        return jsonData;
     } catch (error) {
         console.warn('Errore nel fetch dei dati. Utilizzo dati mock:', error.message);
         return originalMockData.data;
@@ -170,13 +170,13 @@ function transformAPIData(apiData) {
             data: apiData.top10_thematic_objectives.map(item => item.amount)
         },
         tipologieProgetto: {
-            labels: apiData.top10_project_typologies.map(item => item.nature),
+            labels: apiData.top10_project_typologies.map(item => item.type),
             data: apiData.top10_project_typologies.map(item => item.amount)
         },
-        sottosettoriInfrastrutturali: {
-            labels: apiData.top5_infrastructural_subsectors.map(item => item.subsector),
-            data: apiData.top5_infrastructural_subsectors.map(item => item.amount)
-        },
+        // sottosettoriInfrastrutturali: {
+        //     labels: apiData.top5_infrastructural_subsectors.map(item => item.subsector),
+        //     data: apiData.top5_infrastructural_subsectors.map(item => item.amount)
+        // },
         costoVsPagamenti: {
             labels: ['Costo Realizzato', 'Pagamenti Effettuati', 'Differenza'],
             data: [
@@ -497,72 +497,72 @@ function createBarChartTipologie(data) {
 /**
  * 5) Grafico a Barre Orizzontali - Sottosettori Infrastrutturali
  */
-function createHorizontalBarSottosettori(data) {
-    const ctx = document.getElementById('horizontalBarSottosettori').getContext('2d');
+// function createHorizontalBarSottosettori(data) {
+//     const ctx = document.getElementById('horizontalBarSottosettori').getContext('2d');
 
-    if (chartInstances.horizontalBarSottosettori) {
-        chartInstances.horizontalBarSottosettori.destroy();
-    }
+//     if (chartInstances.horizontalBarSottosettori) {
+//         chartInstances.horizontalBarSottosettori.destroy();
+//     }
 
-    chartInstances.horizontalBarSottosettori = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: data.sottosettoriInfrastrutturali.labels,
-            datasets: [{
-                label: 'Importo (€)',
-                data: data.sottosettoriInfrastrutturali.data,
-                backgroundColor: '#7f7ec7',
-                borderColor: '#7f7ec7',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `Importo: ${formatCurrency(context.parsed.x)}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return formatCurrency(value);
-                        },
-                        font: {
-                            size: 10,
-                            family: "'Arimo', sans-serif"
-                        }
-                    },
-                    grid: {
-                        color: '#e0e0e0'
-                    }
-                },
-                y: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        font: {
-                            size: 11,
-                            family: "'Arimo', sans-serif"
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
+//     chartInstances.horizontalBarSottosettori = new Chart(ctx, {
+//         type: 'bar',
+//         data: {
+//             labels: data.sottosettoriInfrastrutturali.labels,
+//             datasets: [{
+//                 label: 'Importo (€)',
+//                 data: data.sottosettoriInfrastrutturali.data,
+//                 backgroundColor: '#7f7ec7',
+//                 borderColor: '#7f7ec7',
+//                 borderWidth: 1
+//             }]
+//         },
+//         options: {
+//             indexAxis: 'y',
+//             responsive: true,
+//             maintainAspectRatio: false,
+//             plugins: {
+//                 legend: {
+//                     display: false
+//                 },
+//                 tooltip: {
+//                     callbacks: {
+//                         label: function(context) {
+//                             return `Importo: ${formatCurrency(context.parsed.x)}`;
+//                         }
+//                     }
+//                 }
+//             },
+//             scales: {
+//                 x: {
+//                     beginAtZero: true,
+//                     ticks: {
+//                         callback: function(value) {
+//                             return formatCurrency(value);
+//                         },
+//                         font: {
+//                             size: 10,
+//                             family: "'Arimo', sans-serif"
+//                         }
+//                     },
+//                     grid: {
+//                         color: '#e0e0e0'
+//                     }
+//                 },
+//                 y: {
+//                     grid: {
+//                         display: false
+//                     },
+//                     ticks: {
+//                         font: {
+//                             size: 11,
+//                             family: "'Arimo', sans-serif"
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     });
+// }
 
 /**
  * 6) Grafico a Barre Affiancate - Costo Realizzato vs Pagamenti Effettuati
@@ -710,7 +710,7 @@ async function updateDashboard(macroArea = 'nessun filtro', fundingSource = 'nes
         createBarChartFondi(chartData);
         createHorizontalBarObiettivi(chartData);
         createBarChartTipologie(chartData);
-        createHorizontalBarSottosettori(chartData);
+        // createHorizontalBarSottosettori(chartData);
         createBarChartCostoPagamenti(chartData);
 
         console.log('Dashboard Analisi Finanziaria aggiornata con successo');

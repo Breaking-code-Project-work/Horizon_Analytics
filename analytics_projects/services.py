@@ -277,15 +277,15 @@ def specific_funds_contribution(filters):
     )
 
     return {
-        "FESR (UE)": float(data["fesr"] or 0),
-        "FSE (UE)": float(data["fse"] or 0),
-        "FSC (Stato)": float(data["fsc"] or 0),
-        "Fondo_di_Rotazione (Stato)": float(data["rot"] or 0),
-        "FEASR (UE)": float(data["feasr"] or 0),
-        "FEAMP (UE)": float(data["feamp"] or 0),
-        "IOG (UE)": float(data["iog"] or 0),
-        "PAC (Stato)": float(data["pac"] or 0),
-        "Completamenti (Stato)": float(data["comp"] or 0),
+        "FESR_UE": float(data["fesr"] or 0),
+        "FSE_UE": float(data["fse"] or 0),
+        "FSC_Stato": float(data["fsc"] or 0),
+        "Fondo_di_Rotazione_Stato": float(data["rot"] or 0),
+        "FEASR_UE": float(data["feasr"] or 0),
+        "FEAMP_UE": float(data["feamp"] or 0),
+        "IOG_UE": float(data["iog"] or 0),
+        "PAC_Stato": float(data["pac"] or 0),
+        "Completamenti_Stato": float(data["comp"] or 0),
         "Altri_Stato": float(data["altri_stato"] or 0),
     }
 
@@ -312,17 +312,25 @@ def top10_thematic_objectives(filters):
 
 def get_funds_to_be_found(filters):
     """
-    Give a dictionary with:
-    - number of projects with total savings > 0
-    - total sum of savings of these projects
+    Ritorna:
+    - numero progetti con savings > 0
+    - totale saving
     """
+
     projects = get_filtered_projects_analysis(filters)
 
-    # projects with total_savings > 0
-    projects_with_savings = [p for p in projects if p.funding.total_savings > 0]
+    # Prefetch funding per evitare N+1 queries
+    projects = projects.prefetch_related("funding")
 
-    number_of_projects_with_gap = len(projects_with_savings)
-    total_missing_amount = sum(p.funding.total_savings for p in projects_with_savings)
+    number_of_projects_with_gap = 0
+    total_missing_amount = 0
+
+    for p in projects:
+        total_savings = sum((f.total_savings or 0) for f in p.funding.all())
+
+        if total_savings > 0:
+            number_of_projects_with_gap += 1
+            total_missing_amount += total_savings
 
     return {
         "number_of_projects_with_gap": number_of_projects_with_gap,
@@ -363,7 +371,7 @@ def get_top_project_typologies():
     result = []
     for x in fundings:
         result.append({
-            "typology": x["project__cup_typology"],
+            "type": x["project__cup_typology"],
             "amount": x["total"] or 0
         })
 
