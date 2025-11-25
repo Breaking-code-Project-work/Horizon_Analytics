@@ -152,9 +152,7 @@ function transformAPIData(apiData) {
                     'Stato': 'Stato',
                     'Regioni': 'Regioni', 
                     'Privato': 'Privato',
-                    'Comune': 'Comune',
                     'Altro_Pubblico': 'Altro Pubblico',
-                    'Provincia': 'Provincia'
                 };
                 return sourceMap[item.source] || item.source;
             }),
@@ -239,7 +237,7 @@ function createPieChartFonti(data) {
                 data: data.fontiFinanziamento.data,
                 backgroundColor: [
                     '#2b29a7', '#504f9c', '#7f7ec7', '#a5a4d6', 
-                    '#c7c7e7', '#e0e0f0', '#f0f0f8'
+                    '#6866daff',
                 ],
                 borderWidth: 2,
                 borderColor: '#ffffff'

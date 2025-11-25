@@ -369,7 +369,7 @@ def get_top_project_typologies():
     result = []
     for x in fundings:
         result.append({
-            "type": x["project__cup_typology"] or " ",
+            "type": x["project__cup_typology"] or "sconosciuto",
             "amount": x["total"] or 0
         })
 

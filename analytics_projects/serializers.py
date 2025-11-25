@@ -55,9 +55,7 @@ class FundingSourcesAnalysisSerializer(serializers.Serializer):
     Stato = serializers.FloatField()
     Regioni = serializers.FloatField()
     Privato = serializers.FloatField()
-    Comune = serializers.FloatField()
     Altro_Pubblico = serializers.FloatField()
-    Provincia = serializers.FloatField()
 
 class SpecificFundsContributionSerializer(serializers.Serializer):
     FESR_UE = serializers.FloatField()
