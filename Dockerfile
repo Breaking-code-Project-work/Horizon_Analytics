@@ -2,9 +2,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# installa bash, librerie PostgreSQL e gcc
+# installa bash, librerie PostgreSQL, gcc e git
 RUN apt-get update && apt-get install -y \
-    libpq-dev gcc postgresql-client bash \
+    libpq-dev gcc postgresql-client bash git \
     && apt-get clean
 
 # copia requirements e installa

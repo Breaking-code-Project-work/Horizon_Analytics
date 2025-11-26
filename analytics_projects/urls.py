@@ -2,6 +2,11 @@ from django.urls import path
 from django.contrib import admin
 from . import views
 from .views import OverviewAPI, AnalysisAPI
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
 
 urlpatterns = [
     path('api/overview/', OverviewAPI.as_view(), name='overview-api'), #url of API
@@ -15,4 +20,10 @@ urlpatterns = [
     path('efficienza_e_performance_page/', views.efficienza_e_performance_page, name='efficienza_e_performance_page'), #url of efficenza e performance page
     path('territori_e_attori_page/', views.territori_e_attori_page, name='territori_e_attori_page'), #url of territori e attori page
     path('api/analysis/', AnalysisAPI.as_view(), name='analysis-api'), #url of API
+    # Generate the OpenAPI file
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    # Swagger UI
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # ReDoc (alternative to Swagger)
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]

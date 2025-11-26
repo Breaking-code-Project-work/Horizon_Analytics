@@ -30,7 +30,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'analytics_projects',
     'rest_framework',
+    'drf_spectacular',
+    'drf_spectacular_sidecar'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
