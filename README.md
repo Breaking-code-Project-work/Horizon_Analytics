@@ -87,7 +87,7 @@ docker-compose down
 The platform exposes a REST API for accessing data on projects and fund allocation.
 You can explore the API interactively using **Swagger UI**:
 
-[View API Documentation](https://github.io/)
+[View API Documentation](https://breaking-code-project-work.github.io/Horizon_Analytics/)
 
 This documentation is generated from the OpenAPI specification (`openapi.yaml`) included in the `/docs` folder of this repository.
 It provides details about all available endpoints, request parameters and response formats.
