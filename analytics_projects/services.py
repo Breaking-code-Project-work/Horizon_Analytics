@@ -37,42 +37,6 @@ def get_filtered_projects(filters):
 
     return projects_qs.distinct()
 
-
-def get_filtered_projects_analysis(filters):
-    """
-    filter by funding_source and macroarea
-    """
-    funding_source = filters.get("funding_source")
-    macroarea = filters.get("macroarea")
-
-    projects_qs = Project.objects.all()
-
-    # Filtro per macroarea
-    if macroarea and macroarea != "Tutte":
-        projects_qs = projects_qs.filter(locations__macroarea=macroarea)
-
-    # Prefetch dei funding in base al funding_source
-    if funding_source and funding_source != "Tutte":
-        # Definiamo il filtro dinamico sul funding
-        # assumiamo che funding_source sia lo stesso nome del campo in Funding
-        funding_prefetch = Prefetch(
-            "funding",
-            queryset=Funding.objects.only(
-                funding_source,  # il campo specifico richiesto
-                "total_funds_gross",
-                "total_funds_net",
-                "total_savings",
-                "total_public_savings"
-            ),
-            to_attr="filtered_funding"
-        )
-        projects_qs = projects_qs.prefetch_related(funding_prefetch)
-    else:
-        # Tutti i funding
-        projects_qs = projects_qs.prefetch_related("funding")
-
-    return projects_qs.distinct()
-
 # ------------------------------
 # Top 10 progetti per finanziamento
 # ------------------------------
@@ -189,169 +153,193 @@ def sum_funding_gross(filters):
     return result['total_gross'] or 0
 
 # ------------------------------
-# Restituisce un queryset di Funding filtrato secondo i filtri del contratto:
-#     - macroarea: Centro-Nord, Mezzogiorno, etc.
-#     - funding_source: UE, Stato, Regioni, Privato, Comune, Provincia, Altro_Pubblico
-#     Non filtra progetti a caso, serve solo a limitare i fundings considerati per le aggregazioni.
+# Funzione base per filtrare progetti per macroarea
 # ------------------------------
-def apply_filters(filters):
-    projects_qs = Project.objects.prefetch_related("funding", "locations")
-
+def get_filtered_projects_by_filters(filters):
+    """
+    Restituisce:
+      - projects_qs filtrati per macroarea
+      - funding_qs filtrato per funding_source
+    """
     macroarea = filters.get("macroarea")
     funding_source = filters.get("funding_source")
 
+    # --------------------------
+    # Filtra i progetti per macroarea
+    # --------------------------
+    projects_qs = Project.objects.prefetch_related("locations").distinct()
     if macroarea and macroarea != "Tutte":
         projects_qs = projects_qs.filter(locations__macroarea=macroarea)
 
-    # Filtraggio per funding_source se necessario
+    # --------------------------
+    # Filtra i finanziamenti per funding_source
+    # --------------------------
     funding_qs = Funding.objects.filter(project__in=projects_qs)
-
     if funding_source and funding_source != "Tutte":
-        if funding_source == "UE":
-            funding_qs = funding_qs.filter(
-                Q(eu_funds__gt=0) |
-                Q(eu_funds_fesr__gt=0) |
-                Q(eu_funds_fse__gt=0) |
-                Q(eu_funds_feasr__gt=0) |
-                Q(eu_funds_feamp__gt=0) |
-                Q(eu_funds_iog__gt=0)
-            )
-        elif funding_source == "Stato":
-            funding_qs = funding_qs.filter(
-                Q(state_rotating_fund__gt=0) |
-                Q(state_fsc__gt=0) |
-                Q(state_pac__gt=0) |
-                Q(state_completions__gt=0) |
-                Q(state_other_measures__gt=0)
-            )
-        elif funding_source == "Regioni":
-            funding_qs = funding_qs.filter(regional_funds__gt=0)
-        elif funding_source == "Privato":
-            funding_qs = funding_qs.filter(private_funds__gt=0)
-        elif funding_source == "Comune":
-            funding_qs = funding_qs.filter(municipal_funds__gt=0)
-        elif funding_source == "Provincia":
-            funding_qs = funding_qs.filter(provincial_funds__gt=0)
-        elif funding_source == "Altro_Pubblico":
-            funding_qs = funding_qs.filter(other_public_funds__gt=0)
+        source_map = {
+            "UE": Q(eu_funds__gt=0) | Q(eu_funds_fesr__gt=0) | Q(eu_funds_fse__gt=0) |
+                  Q(eu_funds_feasr__gt=0) | Q(eu_funds_feamp__gt=0) | Q(eu_funds_iog__gt=0),
+            "Stato": Q(state_rotating_fund__gt=0) | Q(state_fsc__gt=0) | Q(state_pac__gt=0) |
+                     Q(state_completions__gt=0) | Q(state_other_measures__gt=0),
+            "Regioni": Q(regional_funds__gt=0),
+            "Privato": Q(private_funds__gt=0),
+            "Comune": Q(municipal_funds__gt=0),
+            "Provincia": Q(provincial_funds__gt=0),
+            "Altro_Pubblico": Q(other_public_funds__gt=0),
+        }
+        if funding_source in source_map:
+            funding_qs = funding_qs.filter(source_map[funding_source])
 
     return projects_qs.distinct(), funding_qs.distinct()
-
-
 
 
 # ------------------------------
 # Somma totale delle fonti di finanziamento
 # ------------------------------
 def funding_sources_analysis(filters):
-    projects, funding = apply_filters(filters)
+    projects_qs, funding_qs = get_filtered_projects_by_filters(filters)
+    funding_source = filters.get("funding_source")
 
-    data = funding.aggregate(
-        UE=Sum("eu_funds"),
-        Stato=Sum(
-            F("state_rotating_fund") +
-            F("state_fsc") +
-            F("state_pac") +
-            F("state_completions") +
-            F("state_other_measures")
-        ),
-        Regioni=Sum("regional_funds"),
-        Privato=Sum("private_funds"),
-        Comune=Sum("municipal_funds"),
-        Altro_Pubblico=Sum("other_public_funds"),
-        Provincia=Sum("provincial_funds"),
-    )
+    all_sources = ["UE", "Stato", "Regioni", "Privato", "Comune", "Provincia", "Altro_Pubblico"]
 
-    return {k: float(v or 0) for k, v in data.items()}
+    source_fields = {
+        "UE": ["eu_funds"],
+        "Stato": ["state_rotating_fund", "state_fsc", "state_pac", "state_completions", "state_other_measures"],
+        "Regioni": ["regional_funds"],
+        "Privato": ["private_funds"],
+        "Comune": ["municipal_funds"],
+        "Provincia": ["provincial_funds"],
+        "Altro_Pubblico": ["other_public_funds"]
+    }
+
+    output_map = {
+        "eu_funds": "UE",
+        "state_fsc": "Stato",
+        "state_rotating_fund": "Stato",
+        "state_pac": "Stato",
+        "state_completions": "Stato",
+        "state_other_measures": "Stato",
+        "regional_funds": "Regioni",
+        "private_funds": "Privato",
+        "municipal_funds": "Comune",
+        "provincial_funds": "Provincia",
+        "other_public_funds": "Altro_Pubblico"
+    }
+
+    if funding_source in source_fields:
+        fields_to_aggregate = source_fields[funding_source]
+    else:
+        fields_to_aggregate = sum(source_fields.values(), [])
+
+    agg = funding_qs.aggregate(**{f: Sum(f) for f in fields_to_aggregate})
+
+    result = {s: 0.0 for s in all_sources}
+    for f in fields_to_aggregate:
+        key = output_map[f]
+        result[key] += float(agg.get(f, 0) or 0)
+
+    return result
 
 
 # ------------------------------
 # Somma totale delle fonti di finanziamento SPECIFICHE
 # ------------------------------
 def specific_funds_contribution(filters):
-    projects, funding = apply_filters(filters)
+    projects_qs, funding_qs = get_filtered_projects_by_filters(filters)
 
-    data = funding.aggregate(
-        fesr=Sum("eu_funds_fesr"),
-        fse=Sum("eu_funds_fse"),
-        feasr=Sum("eu_funds_feasr"),
-        feamp=Sum("eu_funds_feamp"),
-        iog=Sum("eu_funds_iog"),
-        fsc=Sum("state_fsc"),
-        rot=Sum("state_rotating_fund"),
-        pac=Sum("state_pac"),
-        comp=Sum("state_completions"),
-        altri_stato=Sum("state_other_measures"),
-    )
-
-    return {
-        "FESR_UE": float(data["fesr"] or 0),
-        "FSE_UE": float(data["fse"] or 0),
-        "FSC_Stato": float(data["fsc"] or 0),
-        "Fondo_di_Rotazione_Stato": float(data["rot"] or 0),
-        "FEASR_UE": float(data["feasr"] or 0),
-        "FEAMP_UE": float(data["feamp"] or 0),
-        "IOG_UE": float(data["iog"] or 0),
-        "PAC_Stato": float(data["pac"] or 0),
-        "Completamenti_Stato": float(data["comp"] or 0),
-        "Altri_Stato": float(data["altri_stato"] or 0),
+    field_mapping = {
+        "eu_funds_fesr": "FESR_UE",
+        "eu_funds_fse": "FSE_UE",
+        "eu_funds_feasr": "FEASR_UE",
+        "eu_funds_feamp": "FEAMP_UE",
+        "eu_funds_iog": "IOG_UE",
+        "state_fsc": "FSC_Stato",
+        "state_rotating_fund": "Fondo_di_Rotazione_Stato",
+        "state_pac": "PAC_Stato",
+        "state_completions": "Completamenti_Stato",
+        "state_other_measures": "Altri_Stato",
+        "regional_funds": "Regioni",
+        "private_funds": "Privato",
+        "municipal_funds": "Comune",
+        "provincial_funds": "Provincia",
+        "other_public_funds": "Altro_Pubblico"
     }
 
+    # Aggrega solo i campi filtrati se funding_source è specificato
+    funding_source = filters.get("funding_source")
+    source_fields_map = {
+        "UE": ["eu_funds_fesr", "eu_funds_fse", "eu_funds_feasr", "eu_funds_feamp", "eu_funds_iog"],
+        "Stato": ["state_fsc", "state_rotating_fund", "state_pac", "state_completions", "state_other_measures"],
+        "Regioni": ["regional_funds"],
+        "Privato": ["private_funds"],
+        "Comune": ["municipal_funds"],
+        "Provincia": ["provincial_funds"],
+        "Altro_Pubblico": ["other_public_funds"]
+    }
+
+    if funding_source in source_fields_map:
+        fields_to_aggregate = source_fields_map[funding_source]
+    else:
+        fields_to_aggregate = list(field_mapping.keys())
+
+    agg = funding_qs.aggregate(**{f: Sum(f) for f in fields_to_aggregate})
+
+    # Mantieni tutte le chiavi per il serializer
+    result = {v: 0.0 for v in field_mapping.values()}
+    for f, out_key in field_mapping.items():
+        if f in fields_to_aggregate:
+            result[out_key] = float(agg.get(f, 0) or 0)
+    return result
+
 
 # ------------------------------
-# Top 10 tematiche con il maggior valore di finanziamento
+# Top 10 tematiche con il maggior valore di finanziamento (aggiornata con filtro funding_source)
 # ------------------------------
 def top10_thematic_objectives(filters):
-    projects, funding = apply_filters(filters)
+    projects_qs, funding_qs = get_filtered_projects_by_filters(filters)
+
+    # Se non ci sono progetti o finanziamenti filtrati, ritorna vuoto
+    if not funding_qs.exists():
+        return []
 
     themes = (
-        projects.values("oc_synthetic_theme")
-        .annotate(amount=Sum("funding__total_funds_gross"))
+        funding_qs
+        .values("project__oc_synthetic_theme")
+        .annotate(amount=Sum("total_funds_gross"))
         .order_by("-amount")[:10]
     )
 
     return [
         {
-            "description": t["oc_synthetic_theme"] or "Non specificato",
+            "description": t["project__oc_synthetic_theme"] or "Non specificato",
             "amount": float(t["amount"] or 0)
         }
         for t in themes
     ]
 
+
+# ------------------------------
+# Totale fondi da trovare (gap)
+# ------------------------------
 def get_funds_to_be_found(filters):
-    """
-    Ritorna:
-    - numero progetti con savings > 0
-    - totale saving
-    """
-    projects = get_filtered_projects_analysis(filters)
-    # Prefetch funding per evitare N+1 queries
-    projects = projects.prefetch_related("funding")
+    projects_qs, funding_qs = get_filtered_projects_by_filters(filters)
 
-    number_of_projects_with_gap = 0
-    total_missing_amount = 0
+    project_sums = funding_qs.values("project_id").annotate(total_savings=Sum("total_savings"))
 
-    for p in projects:
-        total_savings = sum((f.total_savings or 0) for f in p.funding.all())
-
-        if total_savings > 0:
-            number_of_projects_with_gap += 1
-            total_missing_amount += total_savings
+    number_of_projects_with_gap = sum(1 for p in project_sums if p["total_savings"] > 0)
+    total_missing_amount = sum(p["total_savings"] for p in project_sums if p["total_savings"] > 0)
 
     return {
         "number_of_projects_with_gap": number_of_projects_with_gap,
         "total_missing_amount": total_missing_amount
     }
 
-def get_payments_realization_gap(filters):
-    """
-    give a dictionary with total realized cost, total payment and difference between them
-    """
-    # no filters
-    projects = Project.objects.all()
 
-    # Aggrega i valori dei finanziamenti dei progetti filtrati
-    aggregation = Funding.objects.filter(project__in=projects).aggregate(
+# ------------------------------
+# Realizzazione e pagamento - NON filtrata
+# ------------------------------
+def get_payments_realization_gap(filters):
+    aggregation = Funding.objects.aggregate(
         total_realized_cost=Sum('total_funds_gross'),
         total_payments_made=Sum('total_funds_net'),
     )
@@ -366,25 +354,29 @@ def get_payments_realization_gap(filters):
         "overall_difference": overall_difference
     }
 
-def get_top_project_typologies():
-    projects_qs = get_filtered_projects(filters={})
 
-    fundings = (
-        Funding.objects
-        .filter(
-            project__in=projects_qs,
-            project__cup_typology__isnull=False
-        )
+# ------------------------------
+# Top 10 tipologie di progetto per finanziamento (aggiornata con filtro funding_source)
+# ------------------------------
+def get_top_project_typologies(filters):
+    projects_qs, funding_qs = get_filtered_projects_by_filters(filters)
+
+    # Se non ci sono progetti o finanziamenti filtrati, ritorna vuoto
+    if not funding_qs.exists():
+        return []
+
+    typologies = (
+        funding_qs
+        .filter(project__cup_typology__isnull=False)
         .values("project__cup_typology")
         .annotate(total=Sum("total_funds_gross"))
         .order_by("-total")[:10]
     )
 
-    result = []
-    for x in fundings:
-        result.append({
-            "type": x["project__cup_typology"] or "sconosciuto",
-            "amount": x["total"] or 0
-        })
-
-    return result
+    return [
+        {
+            "type": t["project__cup_typology"] or "sconosciuto",
+            "amount": float(t["total"] or 0)
+        }
+        for t in typologies
+    ]

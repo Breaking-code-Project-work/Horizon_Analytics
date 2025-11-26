@@ -109,7 +109,7 @@ class AnalysisAPI(APIView):
             "funding_sources_analysis": funding_sources_analysis(filters),
             "specific_funds_contribution": specific_funds_contribution(filters),
             "top10_thematic_objectives": top10_thematic_objectives(filters),
-            "top10_project_typologies": get_top_project_typologies(),
+            "top10_project_typologies": get_top_project_typologies(filters),
             "funds_to_be_found": get_funds_to_be_found(filters),
             "payments_realization_gap": get_payments_realization_gap(filters),
         }
